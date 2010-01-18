@@ -57,7 +57,10 @@ end
 username = next_arg "Please specify the username to run as"
 
 if ENV['SSH_ORIGINAL_COMMAND']
-  ARGV = ENV['SSH_ORIGINAL_COMMAND'].split	
+  ARGV.clear
+  ENV['SSH_ORIGINAL_COMMAND'].split.each do |arg|
+    ARGV << arg
+  end
 end
 
 command = next_arg "Please specify a command to run"
