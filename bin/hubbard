@@ -55,6 +55,11 @@ def validate_action_name(name)
 end
 
 username = next_arg "Please specify the username to run as"
+
+if ENV['SSH_ORIGINAL_COMMAND']
+  ARGV = ENV['SSH_ORIGINAL_COMMAND'].split	
+end
+
 command = next_arg "Please specify a command to run"
 
 if command == "run-as"
