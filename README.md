@@ -23,9 +23,9 @@ The first step is to create a user account called "hub" on the server machine an
 
     $ gem install hubbard
 
-Unless you installed the gem using "sudo", the "hubbard" executable will be found somewhere under the "~/.gem" directory. You'll need to make sure this directory is included in the PATH whenever anyone uses SSH to connect. You can do this by updating the "~/.bash_profile" file:
+Unless you installed the gem using "sudo", the "hubbard" executable will be found somewhere under the "~/.gem" directory. You'll need to make sure this directory is included in the PATH whenever anyone uses SSH to connect. You can do this by adding the following line to the top of your "~/.bashrc" file (make sure the path matches):
 
-    $ echo "export PATH=\$PATH:~/.gem/ruby/1.8/bin" >> ~/.bash_profile
+    export PATH=$PATH:~/.gem/ruby/1.8/bin
 
 The next step is to create an SSH keypair to access the "admin" account on the Hubbard server. You should only use this key when performing tasks that require admin access. Run this on the machine that you'll be accessing Hubbard from (i.e. your local workstation, not the server):
 
