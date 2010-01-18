@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+HUB=File.expand_path(File.join(File.dirname(__FILE__), '..', 'bin', 'hubbard'))
+
+HUB_USERNAME=ENV['HUB_USERNAME']
+fail "Please define HUB_USERNAME" unless HUB_USERNAME
+
+# Ignore hostname passed in
+ARGV.shift
+
+$stderr.puts "#{HUB} #{HUB_USERNAME} #{ARGV.join(' ')}"
+exec "#{HUB} #{HUB_USERNAME} #{ARGV.join(' ')}"

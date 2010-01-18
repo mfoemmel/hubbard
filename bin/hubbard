@@ -1,0 +1,159 @@
+#!/usr/bin/env ruby
+
+require 'fileutils'
+
+PROJECT_REGEX='[a-zA-Z0-9\-]{1,32}'
+REPOSITORY_REGEX='[a-zA-Z0-9\-]{1,32}'
+USERNAME_REGEX='[a-zA-Z0-9\-]{1,32}'
+
+fail "Please define HUB_DATA" unless HUB_DATA=ENV['HUB_DATA']
+
+FileUtils.mkdir_p(File.join(HUB_DATA, "projects"))
+FileUtils.mkdir_p(File.join(HUB_DATA, "accounts"))
+
+def next_arg(msg)
+  if ARGV.length < 1
+    $stderr.puts msg
+    exit 1
+  end
+  ARGV.shift
+end
+
+def check_status(msg)
+  if $!.exitstatus != 0
+    $sderr.puts msg
+    exit 1
+  end
+end
+
+def validate_project_name(name)
+  if name !~ /#{PROJECT_REGEX}/
+    $stderr.put "Project names can only contain letter, numbers, and hyphens"
+    exit 1
+  end 
+end
+
+def validate_repository_name(name)
+  if name !~ /#{REPOSITORY_REGEX}/
+    $stderr.put "Repository names can only contain letter, numbers, and hyphens"
+    exit 1
+  end 
+end
+
+def validate_user_name(name)
+  if name !~ /#{USERNAME_REGEX}/
+    $stderr.put "User names can only contain letter, numbers, and hyphens"
+    exit 1
+  end 
+end
+
+def validate_action_name(name)
+  unless name == 'read' || name == 'write' || name == 'admin'
+    $stderr.put "Not a valid action (must be one of: read, write, admin)"
+    exit 1
+  end 
+end
+
+username = next_arg "Please specify the username to run as"
+command = next_arg "Please specify a command to run"
+
+if command == "run-as"
+  if username != "admin"
+    $stderr.puts "You don't have permission to do that"
+    exit 1
+  end
+  username = next_arg "Please specify the username to run as"
+  command = next_arg "Please specify a command to run"
+end
+
+@username = username
+
+def implies(a1, a2)
+  case a1
+  when 'admin'
+    true
+  when 'write'
+    a2 != 'admin'
+  when 'read'
+      a2 == 'read'
+  else
+    raise "Unknown action type: *#{a1}*"
+  end
+end
+
+def authorize(project_name, action)
+  unless is_authorized(project_name, action)
+    $stderr.puts "You don't have permission to do that"
+    exit 3
+  end
+end
+
+def is_authorized(project_name, action)
+  Dir.chdir(find_project_dir(project_name)) do
+    if action == 'read' && File.read('.visibility').strip == 'public'
+      return true
+    end
+    File.read(".permissions").split("\n").each do |line|
+      permission = line.strip.split('=')
+      line_username = permission[0]
+      line_action = permission[1]
+      if line_username == @username && implies(line_action, action)
+        return true
+      end
+    end
+    false
+  end
+end
+
+def find_account_dir(user_name)
+  File.join(HUB_DATA, "accounts", user_name)
+end
+
+def find_project_dir(project_name)
+  File.join(HUB_DATA, "projects", project_name)
+end
+
+def find_repository_dir(project_name, repository_dir)
+  File.join(find_project_dir(project_name), repository_dir)
+end
+
+def read_project_name
+  project_name = next_arg("Please specify a project name")
+  validate_project_name(project_name)
+  project_name
+end
+
+def read_repository_name
+  repository_name = next_arg("Please specify a repository name")
+  validate_repository_name(repository_name)
+  repository_name
+end
+
+def read_user_name
+  user_name = next_arg("Please specify a username")
+  validate_user_name(user_name)
+  user_name
+end
+
+def sync_keys
+  File.open(File.expand_path("~/.ssh/authorized_keys"), "w") do |file|
+    Dir.entries(File.join(HUB_DATA, "accounts")).each do |account|
+      next if account == '.' || account == '..'
+      key_dir = File.join(HUB_DATA, "accounts", account, "keys")
+      Dir.entries(key_dir).each do |name|
+        next if name == '.' || name == '..'
+        key = File.read(File.join(key_dir, name))
+        file << "command=\"hubbard #{@username}\" #{key} #{name}\n" 
+      end
+    end
+  end
+end
+
+command_file = File.expand_path(File.join(File.dirname(__FILE__), "..", "commands", "#{command}.rb"))
+
+if File.exist?(command_file)
+  load command_file
+else
+  $stderr.puts "Unknown command: #{command}"
+  exit 1
+end
