@@ -5,12 +5,12 @@ Hubbard is a command line tool for managing shared git repositories in a team en
 
 Hubbard uses public SSH keys to keep track of who is executing what commands. This means you only have to create a single account on the server, instead of one per user.
 
-Hubbards was heavily inspired by gitosis, another tool for managing git repositories. However, the goal of Hubbard was to place less burden on the system administrator by allowing users to manage permissions for their own projects.
+Hubbard was heavily inspired by gitosis, another tool for managing git repositories. However, the goal of Hubbard was to place less burden on the system administrator by allowing users to manage permissions for their own projects.
 
 How It Works
 ============
 
-All comminication between users the the Hubbard server happens over SSH. Users must register their public SSH keys with the server before they can connect to it.
+All comminication between users and the Hubbard server happens over SSH. Users must register their public SSH keys with the server before they can connect to it.
 
 When a user connects to the Hubbard server, the SSH daemon tries to find the user's public SSH key the "~/.ssh/authorized_keys" file on the server. That file also contains information about which user to associate with that SSH key. That information is automatically passed to the "hubbard" executable, so there is no way for users to run other programs on the server. 
 
@@ -59,3 +59,4 @@ Assuming your SSH keys have been set up correcly, you can simply SSH into the se
 To test it, run:
     
     $ hub help
+
