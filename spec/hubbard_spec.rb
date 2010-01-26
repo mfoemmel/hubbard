@@ -160,6 +160,47 @@ describe "Hubble" do
     end
   end
 
+  it "should fork repository in same project" do
+    hub("kipper", "create-project foo")
+    hub("kipper", "create-repository foo bar")
+
+    with_test_project do
+      git("kipper", "push #{ENV['USER']}@#{HUB_HOST}:foo/bar.git master")
+      hub("kipper", "fork-repository foo bar foo bar2")
+      git("kipper", "pull #{ENV['USER']}@#{HUB_HOST}:foo/bar2.git master")
+    end
+  end
+
+  it "should fork repository in different project" do
+    hub("kipper", "create-project foo")
+    hub("kipper", "create-project foo2")
+    hub("kipper", "create-repository foo bar")
+
+    with_test_project do
+      git("kipper", "push #{ENV['USER']}@#{HUB_HOST}:foo/bar.git master")
+      hub("kipper", "fork-repository foo bar foo2 bar2")
+      git("kipper", "pull #{ENV['USER']}@#{HUB_HOST}:foo2/bar2.git master")
+    end
+  end
+
+  it "should require read access to fork repository" do
+    hub("kipper", "create-project foo")
+    hub("kipper", "create-project foo2")
+    hub("kipper", "create-repository foo bar")
+
+    with_test_project do
+      git("kipper", "push #{ENV['USER']}@#{HUB_HOST}:foo/bar.git master")
+      lambda { hub("tiger", "fork-repository foo bar foo2 bar2") }.should raise_error
+      hub("kipper", "add-permission foo tiger read")
+      lambda { hub("tiger", "fork-repository foo bar foo2 bar2") }.should raise_error
+      hub("kipper", "add-permission foo2 tiger write")
+      lambda { hub("tiger", "fork-repository foo bar foo2 bar2") }.should raise_error
+      hub("kipper", "add-permission foo2 tiger admin")
+      hub("tiger", "fork-repository foo bar foo2 bar2")
+      hub("kipper", "add-permission foo2 tiger admin")      
+    end
+  end
+
   it "should remove permission" do
     hub("kipper", "create-project foo")
     hub("kipper", "create-repository foo bar")
