@@ -183,6 +183,17 @@ describe "Hubble" do
     end
   end
 
+  it "should track projects related by forking" do
+    hub("kipper", "create-project foo")
+    hub("kipper", "create-repository foo bar")
+
+    with_test_project do
+      git("kipper", "push #{ENV['USER']}@#{HUB_HOST}:foo/bar.git master")
+      hub("kipper", "fork-repository foo bar foo bar2")
+      hub("kipper", "list-forks foo bar").should == "foo/bar\nfoo/bar2\n"
+    end
+  end
+
   it "should require read access to fork repository" do
     hub("kipper", "create-project foo")
     hub("kipper", "create-project foo2")

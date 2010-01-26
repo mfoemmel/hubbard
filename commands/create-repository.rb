@@ -4,5 +4,6 @@ authorize(project_name, 'admin')
 dir = find_repository_dir(project_name, repository_name)
 FileUtils.mkdir_p(dir)
 Dir.chdir(dir) do
-  exec "git init --bare" 
+  exit $? unless system "git init --bare" 
+  exec "git config hubbard.forkid #{project_name}/#{repository_name}/#{Time.now.to_i}" 
 end

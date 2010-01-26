@@ -13,6 +13,7 @@ list-repositories <project>
 create-repository <project> <repository>
 delete-repository <project> <repository>
 fork-repository <from-project> <from-repository> <to-project> <to-repository>
+list-forks <project> <repository>
 
 Permissions:
 
