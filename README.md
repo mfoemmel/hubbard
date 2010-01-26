@@ -27,6 +27,13 @@ Unless you installed the gem using "sudo", the "hubbard" executable will be foun
 
     export PATH=$PATH:~/.gem/ruby/1.8/bin
 
+Create the directories and files that SSH needs to work.
+    [in hub's home directory]
+    mkdir .ssh
+    chmod 700 .ssh
+    touch .ssh/authorized_keys
+    chmod 600 .ssh/authorized_keys
+
 The next step is to create an SSH keypair to access the "admin" account on the Hubbard server. You should only use this key when performing tasks that require admin access. Run this on the machine that you'll be accessing Hubbard from (i.e. your local workstation, not the server):
 
     $ ssh-keygen -f ~/.ssh/hubadmin
