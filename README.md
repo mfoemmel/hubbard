@@ -5,12 +5,12 @@ Hubbard is a command line tool for managing shared git repositories in a team en
 
 Hubbard uses public SSH keys to keep track of who is executing what commands. This means you only have to create a single account on the server, instead of one per user.
 
-Hubbards was heavily inspired by gitosis, another tool for managing git repositories. However, the goal of Hubbard was to place less burden on the system administrator by allowing users to manage permissions for their own projects.
+Hubbard was heavily inspired by gitosis, another tool for managing git repositories. However, the goal of Hubbard was to place less burden on the system administrator by allowing users to manage permissions for their own projects.
 
 How It Works
 ============
 
-All comminication between users the the Hubbard server happens over SSH. Users must register their public SSH keys with the server before they can connect to it.
+All comminication between users and the Hubbard server happens over SSH. Users must register their public SSH keys with the server before they can connect to it.
 
 When a user connects to the Hubbard server, the SSH daemon tries to find the user's public SSH key the "~/.ssh/authorized_keys" file on the server. That file also contains information about which user to associate with that SSH key. That information is automatically passed to the "hubbard" executable, so there is no way for users to run other programs on the server. 
 
@@ -26,6 +26,13 @@ The first step is to create a user account called "hub" on the server machine an
 Unless you installed the gem using "sudo", the "hubbard" executable will be found somewhere under the "~/.gem" directory. You'll need to make sure this directory is included in the PATH whenever anyone uses SSH to connect. You can do this by adding the following line to the top of your "~/.bashrc" file (make sure the path matches):
 
     export PATH=$PATH:~/.gem/ruby/1.8/bin
+
+Create the directories and files that SSH needs to work.
+    [in hub's home directory]
+    mkdir .ssh
+    chmod 700 .ssh
+    touch .ssh/authorized_keys
+    chmod 600 .ssh/authorized_keys
 
 The next step is to create an SSH keypair to access the "admin" account on the Hubbard server. You should only use this key when performing tasks that require admin access. Run this on the machine that you'll be accessing Hubbard from (i.e. your local workstation, not the server):
 
@@ -59,3 +66,4 @@ Assuming your SSH keys have been set up correcly, you can simply SSH into the se
 To test it, run:
     
     $ hub help
+
