@@ -11,10 +11,9 @@ begin
     gem.homepage = "http://github.com/mfoemmel/hubbard"
     gem.authors = ["Matthew Foemmel"]
     gem.add_development_dependency "rspec", ">= 1.2.9"
-    gem.files << Dir['commands/*.rb']
+    gem.files << Dir['commands/*.rb'] + Dir['lib/**/*.rb']
     gem.bindir = 'bin'
     gem.executables << 'hubbard'
-    gem.require_path = ''
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError

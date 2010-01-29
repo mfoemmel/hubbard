@@ -1,4 +1,4 @@
-unless ARGV.shift =~ /(#{PROJECT_REGEX})\/(#{REPOSITORY_REGEX}).git/
+unless ARGV.shift =~ /(#{Hubbard::PROJECT_REGEX})\/(#{Hubbard::REPOSITORY_REGEX}).git/
   $stderr.puts "Repository not found"
   exit 1
 end

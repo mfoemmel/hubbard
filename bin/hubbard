@@ -1,17 +1,28 @@
 #!/usr/bin/env ruby
-
 require 'fileutils'
-require 'socket'
+require 'optparse'
+require 'yaml'
 
-PROJECT_REGEX='[a-zA-Z0-9\-]{1,32}'
-REPOSITORY_REGEX='[a-zA-Z0-9\-]{1,32}'
-USERNAME_REGEX='[a-zA-Z0-9\-]{1,32}'
+$:.unshift(File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib')))
+require 'hubbard'
 
-HUB_DATA = ENV['HUB_DATA'] || File.expand_path("~/.hubbard")
-HUB_HOST = ENV['HUB_HOST'] || Socket.gethostname
+defaults = { :format => :text }
+options = {}
+OptionParser.new do |opts|
+  formats = [:text, :yaml]
+  opts.on("--private", "Create project with visibility set to private") do |o|
+    options[:private] = o
+  end
+  opts.on("-f", "--format [FORMAT]", formats,
+          "Select format (#{formats.join(', ')})") do |o|
+    options[:format] = o
+  end
+end.parse!
+OPTIONS = defaults.merge(options)
+OPTIONS.freeze
 
-FileUtils.mkdir_p(File.join(HUB_DATA, "projects"))
-FileUtils.mkdir_p(File.join(HUB_DATA, "accounts"))
+FileUtils.mkdir_p(File.join(Hubbard::HUB_DATA, "projects"))
+FileUtils.mkdir_p(File.join(Hubbard::HUB_DATA, "accounts"))
 
 def next_arg(msg)
   if ARGV.length < 1
@@ -29,21 +40,21 @@ def check_status(msg)
 end
 
 def validate_project_name(name)
-  if name !~ /#{PROJECT_REGEX}/
+  if name !~ /#{Hubbard::PROJECT_REGEX}/
     $stderr.put "Project names can only contain letter, numbers, and hyphens"
     exit 1
   end 
 end
 
 def validate_repository_name(name)
-  if name !~ /#{REPOSITORY_REGEX}/
+  if name !~ /#{Hubbard::REPOSITORY_REGEX}/
     $stderr.put "Repository names can only contain letter, numbers, and hyphens"
     exit 1
   end 
 end
 
 def validate_user_name(name)
-  if name !~ /#{USERNAME_REGEX}/
+  if name !~ /#{Hubbard::USERNAME_REGEX}/
     $stderr.put "User names can only contain letter, numbers, and hyphens"
     exit 1
   end 
@@ -116,11 +127,11 @@ def is_authorized(project_name, action)
 end
 
 def find_account_dir(user_name)
-  File.join(HUB_DATA, "accounts", user_name)
+  File.join(Hubbard::HUB_DATA, "accounts", user_name)
 end
 
 def find_project_dir(project_name)
-  File.join(HUB_DATA, "projects", project_name)
+  File.join(Hubbard::HUB_DATA, "projects", project_name)
 end
 
 def find_repository_dir(project_name, repository_dir)
@@ -147,13 +158,13 @@ end
 
 def sync_keys
   File.open(File.expand_path("~/.ssh/authorized_keys"), "w") do |file|
-    Dir.entries(File.join(HUB_DATA, "accounts")).each do |account|
+    Dir.entries(File.join(Hubbard::HUB_DATA, "accounts")).each do |account|
       next if account == '.' || account == '..'
-      key_dir = File.join(HUB_DATA, "accounts", account, "keys")
+      key_dir = File.join(Hubbard::HUB_DATA, "accounts", account, "keys")
       Dir.entries(key_dir).each do |name|
         next if name == '.' || name == '..'
         key = File.read(File.join(key_dir, name))
-        file << "command=\"hubbard #{@username}\",no-port-forwarding,no-pty,no-agent-forwarding,no-X11-forwarding #{key} #{name}\n" 
+        file << %Q~command="hubbard #{@username}",no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty #{key} #{name}\n~
       end
     end
   end
