@@ -1,9 +1,25 @@
 #!/usr/bin/env ruby
-
 require 'fileutils'
+require 'optparse'
+require 'yaml'
 
 $:.unshift(File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib')))
 require 'hubbard'
+
+defaults = { :format => :text }
+options = {}
+OptionParser.new do |opts|
+  formats = [:text, :yaml]
+  opts.on("--private", "Create project with visibility set to private") do |o|
+    options[:private] = o
+  end
+  opts.on("-f", "--format [FORMAT]", formats,
+          "Select format (#{formats.join(', ')})") do |o|
+    options[:format] = o
+  end
+end.parse!
+OPTIONS = defaults.merge(options)
+OPTIONS.freeze
 
 FileUtils.mkdir_p(File.join(Hubbard::HUB_DATA, "projects"))
 FileUtils.mkdir_p(File.join(Hubbard::HUB_DATA, "accounts"))
