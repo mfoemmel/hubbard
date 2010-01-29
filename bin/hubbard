@@ -148,7 +148,7 @@ def sync_keys
       Dir.entries(key_dir).each do |name|
         next if name == '.' || name == '..'
         key = File.read(File.join(key_dir, name))
-        file << "command=\"hubbard #{@username}\" #{key} #{name}\n" 
+        file << %Q~command="hubbard #{@username}",no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty #{key} #{name}\n~
       end
     end
   end
