@@ -8,16 +8,16 @@ describe "Hubble with yaml output" do
   end
 
   it "should load list-projects" do
-    hub("yammer", "create-project a")
-    hub("yammer", "create-project b")
-    hub("yammer", "create-project c")
+    hub("yammer", "create-project a a-desc")
+    hub("yammer", "create-project b b-desc")
+    hub("yammer", "create-project c c-desc")
 
-    projects = YAML::load(hub("#{YAML_OPTION} yammer", "list-projects"))
+    projects = YAML::load(hub("yammer", "#{YAML_OPTION} list-projects")).map{|project|project[:name]}
     projects.should == ["a", "b", "c"]
   end
 
   it "should create repositories" do
-    hub("yammer", "create-project a")
+    hub("yammer", "create-project a a-desc")
     hub("yammer", "create-repository a b")
 
     repositories = YAML::load(hub("yammer", "#{YAML_OPTION} list-repositories a"))

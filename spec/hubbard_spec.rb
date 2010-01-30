@@ -7,18 +7,18 @@ describe "Hubble" do
   end
 
   it "should create project" do
-    hub("kipper", "create-project foo")
-    projects = hub("kipper", "list-projects").split("\n")
+    hub("kipper", "create-project foo foo-desc")
+    projects = list_projects('kipper')
     projects.should == ["foo"]
   end
 
   it "should not allow multiple projects with same name" do
-    hub("kipper", "create-project foo")
+    hub("kipper", "create-project foo foo-desc")
     lambda { hub("kipper", "create-project foo") }.should raise_error
   end
 
   it "should delete project" do
-    hub("kipper", "create-project foo")
+    hub("kipper", "create-project foo foo-desc")
     hub("kipper", "delete-project foo")
 
     projects = hub("kipper", "list-projects").split("\n")
@@ -26,10 +26,10 @@ describe "Hubble" do
   end
 
   it "should default to public project" do
-    hub("kipper", "create-project foo")
+    hub("kipper", "create-project foo foo-desc")
 
     # Other users can see...
-    projects = hub("tiger", "list-projects").split("\n")
+    projects = list_projects("tiger")
     projects.should == ["foo"]
 
     # But not delete
@@ -37,7 +37,7 @@ describe "Hubble" do
   end
 
   it "should support private project" do
-    hub("kipper", "create-project foo --private")
+    hub("kipper", "create-project foo foo-desc --private")
 
     # Other users can't see
     projects = hub("tiger", "list-projects").split("\n")
@@ -45,7 +45,7 @@ describe "Hubble" do
   end
 
   it "should create repositories" do
-    hub("kipper", "create-project foo")
+    hub("kipper", "create-project foo foo-desc")
     hub("kipper", "create-repository foo bar")
 
     repositories = hub("kipper", "list-repositories foo").split("\n")
@@ -67,7 +67,7 @@ describe "Hubble" do
   end
 
   it "should allow git push" do
-    hub("kipper", "create-project foo")
+    hub("kipper", "create-project foo foo-desc")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -76,7 +76,7 @@ describe "Hubble" do
   end
 
   it "should allow git push with write permissions" do
-    hub("kipper", "create-project foo")
+    hub("kipper", "create-project foo foo-desc")
     hub("kipper", "add-permission foo tiger write")
     hub("kipper", "create-repository foo bar")
 
@@ -86,7 +86,7 @@ describe "Hubble" do
   end
 
   it "should not allow git push with read permissions" do
-    hub("kipper", "create-project foo")
+    hub("kipper", "create-project foo foo-desc")
     hub("kipper", "add-permission foo tiger read")
     hub("kipper", "create-repository foo bar")
 
@@ -96,7 +96,7 @@ describe "Hubble" do
   end
 
   it "should allow git pull" do
-    hub("kipper", "create-project foo")
+    hub("kipper", "create-project foo foo-desc")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -106,7 +106,7 @@ describe "Hubble" do
   end
 
   it "should not allow git pull with no permissions" do
-    hub("kipper", "create-project foo --private")
+    hub("kipper", "create-project foo foo-desc --private")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -116,7 +116,7 @@ describe "Hubble" do
   end
 
   it "should allow git pull with read permissions" do
-    hub("kipper", "create-project foo")
+    hub("kipper", "create-project foo foo-desc")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -126,7 +126,7 @@ describe "Hubble" do
   end
 
   it "should fork repository in same project" do
-    hub("kipper", "create-project foo")
+    hub("kipper", "create-project foo foo-desc")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -137,8 +137,8 @@ describe "Hubble" do
   end
 
   it "should fork repository in different project" do
-    hub("kipper", "create-project foo")
-    hub("kipper", "create-project foo2")
+    hub("kipper", "create-project foo foo-desc")
+    hub("kipper", "create-project foo2 foo2-desc")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -149,7 +149,7 @@ describe "Hubble" do
   end
 
   it "should track projects related by forking" do
-    hub("kipper", "create-project foo")
+    hub("kipper", "create-project foo foo-desc")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -160,8 +160,8 @@ describe "Hubble" do
   end
 
   it "should require read access to fork repository" do
-    hub("kipper", "create-project foo")
-    hub("kipper", "create-project foo2")
+    hub("kipper", "create-project foo foo-desc")
+    hub("kipper", "create-project foo2 foo-desc")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -178,7 +178,7 @@ describe "Hubble" do
   end
 
   it "should remove permission" do
-    hub("kipper", "create-project foo")
+    hub("kipper", "create-project foo foo-desc")
     hub("kipper", "create-repository foo bar")
     hub("kipper", "add-permission foo tiger read")
     hub("kipper", "remove-permission foo tiger")
@@ -193,8 +193,8 @@ describe "Hubble" do
   end
 
   it "should allow admin to run-as another user" do
-    hub("admin", "run-as kipper create-project foo")
-    projects = hub("kipper", "list-projects").split("\n")
+    hub("admin", "run-as kipper create-project foo foo-desc")
+    projects = list_projects("kipper")
     projects.should == ["foo"]
   end
 end

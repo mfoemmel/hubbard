@@ -45,3 +45,8 @@ def reset_file_system
   FileUtils.rm_rf HUB_DATA
   FileUtils.rm_rf "tmp"
 end
+
+def list_projects(user)
+  hub(user, "list-projects").split("\n").map { |line| line.split[0] }
+end
+
