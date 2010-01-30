@@ -7,6 +7,10 @@ describe "Hubble with yaml output" do
     reset_file_system
   end
 
+  after(:all) do
+    reset_file_system
+  end
+
   it "should load list-projects" do
     hub("yammer", "create-project a a-desc")
     hub("yammer", "create-project b b-desc")
