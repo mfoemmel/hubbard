@@ -6,8 +6,8 @@ require 'yaml'
 $:.unshift(File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib')))
 require 'hubbard'
 
-FileUtils.mkdir_p(File.join(Hubbard::HUB_DATA, "projects"))
-FileUtils.mkdir_p(File.join(Hubbard::HUB_DATA, "accounts"))
+FileUtils.mkdir_p(Hubbard::PROJECTS_PATH)
+FileUtils.mkdir_p(Hubbard::ACCOUNTS_PATH)
 
 def next_arg(msg)
   if ARGV.length < 1
@@ -45,8 +45,8 @@ def validate_user_name(name)
   end 
 end
 
-def validate_action_name(name)
-  unless name == 'read' || name == 'write' || name == 'admin'
+def validate_action_name(action)
+  unless Hubbard::ACTIONS.member?(action)
     $stderr.put "Not a valid action (must be one of: read, write, admin)"
     exit 1
   end 
@@ -61,10 +61,10 @@ if ENV['SSH_ORIGINAL_COMMAND']
   end
 end
 
-defaults = { :format => :text }
+formats = [:text, :yaml]
+defaults = { :format => formats.first }
 options = {}
 OptionParser.new do |opts|
-  formats = [:text, :yaml]
   opts.on("--private", "Create project with visibility set to private") do |o|
     options[:private] = o
   end
@@ -128,11 +128,11 @@ def is_authorized(project_name, action)
 end
 
 def find_account_dir(user_name)
-  File.join(Hubbard::HUB_DATA, "accounts", user_name)
+  File.join(Hubbard::ACCOUNTS_PATH, user_name)
 end
 
 def find_project_dir(project_name)
-  File.join(Hubbard::HUB_DATA, "projects", project_name)
+  File.join(Hubbard::PROJECTS_PATH, project_name)
 end
 
 def find_repository_dir(project_name, repository_dir)
@@ -159,9 +159,9 @@ end
 
 def sync_keys
   File.open(File.expand_path("~/.ssh/authorized_keys"), "w") do |file|
-    Dir.entries(File.join(Hubbard::HUB_DATA, "accounts")).each do |account|
+    Dir.entries(Hubbard::ACCOUNTS_PATH).each do |account|
       next if account == '.' || account == '..'
-      key_dir = File.join(Hubbard::HUB_DATA, "accounts", account, "keys")
+      key_dir = File.join(Hubbard::ACCOUNTS_PATH, account, "keys")
       Dir.entries(key_dir).each do |name|
         next if name == '.' || name == '..'
         key = File.read(File.join(key_dir, name))

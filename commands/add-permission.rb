@@ -3,10 +3,7 @@ authorize(project_name, 'admin')
 dir = find_project_dir(project_name)
 username = ARGV.shift
 action = ARGV.shift
-unless ['admin','write','read'].member?(action)
-  $stderr.puts "Not a valid action (must be one of: read, write, admin)"
-  exit 1
-end
+validate_action_name(action)
 
 File.open(File.join(dir, ".lock"), "w+") do |lock|
   lock.flock(File::LOCK_EX)

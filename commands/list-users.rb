@@ -3,7 +3,7 @@ if @username != 'admin'
     exit 3
 end
 
-Dir.entries(File.join(Hubbard::HUB_DATA, 'accounts')).each do |account|
+Dir.entries(Hubbard::ACCOUNTS_PATH)).each do |account|
   next if account == '.' || account == '..'
   puts account
 end
