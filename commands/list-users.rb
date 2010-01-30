@@ -1,11 +1,9 @@
-users = [] 
-Dir.entries(File.join(Hubbard::HUB_DATA, "accounts")).each do |entry|
-  next if entry == '.' || entry == '..'
-  users << entry
+if @username != 'admin'
+    $stderr.puts "You don't have permission to do that"
+    exit 3
 end
 
-if OPTIONS[:format] == :yaml
-  puts YAML::dump(users)
-else
-  users.each { |u| puts u }
+Dir.entries(File.join(Hubbard::HUB_DATA, 'accounts')).each do |account|
+  next if account == '.' || account == '..'
+  puts account
 end
