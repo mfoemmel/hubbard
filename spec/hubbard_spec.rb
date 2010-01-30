@@ -16,6 +16,27 @@ describe "Hubble" do
     projects.should == ["foo"]
   end
 
+  it "should set project description" do
+    hub("kipper", "create-project foo old-desc")
+    hub("kipper", "set-description foo new-desc")
+    project = hub("kipper", "list-projects").split("\n")[0].split
+    project[2].should == "new-desc"
+  end
+
+  it "should set project visibility" do
+    hub("kipper", "create-project foo foo-desc")
+    hub("kipper", "set-visibility foo private")
+    project = hub("kipper", "list-projects").split("\n")[0].split
+    project[1].should == "private"
+  end
+
+  it "should rename project" do
+    hub("kipper", "create-project foo foo-desc")
+    hub("kipper", "rename-project foo bar")
+    project = hub("kipper", "list-projects").split("\n")[0].split
+    project[0].should == "bar"
+  end
+
   it "should not allow multiple projects with same name" do
     hub("kipper", "create-project foo foo-desc")
     lambda { hub("kipper", "create-project foo") }.should raise_error

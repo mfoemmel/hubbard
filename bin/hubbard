@@ -110,8 +110,10 @@ def authorize(project_name, action)
 end
 
 def is_authorized(project_name, action)
+  project_dir = find_project_dir(project_name)
+  return false if not File.exist?(project_dir)
   return true if @username == 'admin'
-  Dir.chdir(find_project_dir(project_name)) do
+  Dir.chdir(project_dir) do
     if action == 'read' && File.read('.visibility').strip == 'public'
       return true
     end
