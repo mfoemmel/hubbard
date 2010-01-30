@@ -26,6 +26,13 @@ describe "Hubble" do
     project[1].should == "private"
   end
 
+  it "should rename project" do
+    hub("kipper", "create-project foo foo-desc")
+    hub("kipper", "rename-project foo bar")
+    project = hub("kipper", "list-projects").split("\n")[0].split
+    project[0].should == "bar"
+  end
+
   it "should not allow multiple projects with same name" do
     hub("kipper", "create-project foo foo-desc")
     lambda { hub("kipper", "create-project foo") }.should raise_error
