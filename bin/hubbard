@@ -61,10 +61,10 @@ if ENV['SSH_ORIGINAL_COMMAND']
   end
 end
 
-defaults = { :format => :text }
+formats = [:text, :yaml]
+defaults = { :format => formats.first }
 options = {}
 OptionParser.new do |opts|
-  formats = [:text, :yaml]
   opts.on("--private", "Create project with visibility set to private") do |o|
     options[:private] = o
   end
