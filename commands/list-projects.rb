@@ -1,10 +1,10 @@
-projects_dir = File.join(Hubbard::HUB_DATA, 'projects')
 projects = []
-Dir.foreach(projects_dir) do |project|
+Dir.foreach(Hubbard::PROJECTS_PATH) do |project|
   next if project == "." || project == ".."
   if is_authorized(project, 'read')
-    vis = File.read(File.join(projects_dir, project, ".visibility")).strip 
-    desc = File.read(File.join(projects_dir, project, ".description")).strip
+    project_path = File.join(Hubbard::PROJECTS_PATH, project)
+    vis = File.read(File.join(project_path, ".visibility")).strip 
+    desc = File.read(File.join(project_path, ".description")).strip
     projects << { :name => project, :visibility => vis, :description => desc }
   end
 end
