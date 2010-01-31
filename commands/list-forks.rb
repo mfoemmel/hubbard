@@ -6,8 +6,9 @@ project_dir = find_project_dir(project_name)
 Dir.foreach(File.join(Hubbard::PROJECTS_PATH)) do |dir|
   next if dir == "." || dir == ".."
   next unless is_authorized(dir, 'read')
-  Dir.foreach(find_project_dir(project_name)) do |repository_name|
-    next if repository_name =~ /^\./
+  Dir.foreach(find_project_dir(project_name)) do |repository_dir|
+    next if repository_dir =~ /^\./
+    repository_name = repository_dir.chomp('.git')
     Dir.chdir(find_repository_dir(project_name, repository_name)) do
       if forkid == `git config --get hubbard.forkid`
         puts "#{project_name}/#{repository_name}"

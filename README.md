@@ -10,7 +10,7 @@ Hubbard was heavily inspired by gitosis, another tool for managing git repositor
 How It Works
 ============
 
-All comminication between users and the Hubbard server happens over SSH. Users must register their public SSH keys with the server before they can connect to it.
+All communication between users and the Hubbard server happens over SSH. Users must register their public SSH keys with the server before they can connect to it.
 
 When a user connects to the Hubbard server, the SSH daemon tries to find the user's public SSH key the "~/.ssh/authorized_keys" file on the server. That file also contains information about which user to associate with that SSH key. That information is automatically passed to the "hubbard" executable, so there is no way for users to run other programs on the server. 
 

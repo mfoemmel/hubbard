@@ -6,6 +6,10 @@ describe "Hubble" do
     reset_file_system
   end
 
+  after(:all) do
+    reset_file_system
+  end
+
   it "should create project" do
     hub("kipper", "create-project foo foo-desc")
     projects = list_projects('kipper')

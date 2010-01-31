@@ -138,7 +138,7 @@ def find_project_dir(project_name)
 end
 
 def find_repository_dir(project_name, repository_dir)
-  File.join(find_project_dir(project_name), repository_dir)
+  File.join(find_project_dir(project_name), repository_dir + '.git')
 end
 
 def read_project_name
