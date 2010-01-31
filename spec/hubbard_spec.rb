@@ -96,6 +96,18 @@ describe "Hubble" do
     end
   end
 
+  it "should move repository" do
+    hub("kipper", "create-project foo foo-desc")
+    hub("kipper", "create-project new-foo foo-desc")
+    hub("kipper", "create-repository foo bar")
+
+    with_test_project do
+      git("kipper", "push #{ENV['USER']}@#{HUB_HOST}:foo/bar.git master")
+      hub("kipper", "move-repository foo bar new-foo baz")
+      git("kipper", "push #{ENV['USER']}@#{HUB_HOST}:new-foo/baz.git master")
+    end
+  end
+
   it "should allow git push with write permissions" do
     hub("kipper", "create-project foo foo-desc")
     hub("kipper", "add-permission foo tiger write")
