@@ -10,6 +10,10 @@ describe "Hubble" do
     reset_file_system
   end
 
+  it "should pass exitstatus along from SystemCallError" do
+    pending "Not sure how to make sure that hubbard is passing back the proper exit codes from SystemCallErrors. Doing so would introduce complexity or add something that shouldn't be callable."
+  end
+
   it "should create project" do
     hub("kipper", "create-project foo foo-desc")
     projects = list_projects('kipper')
@@ -78,6 +82,21 @@ describe "Hubble" do
     name,url = repositories[0].split
     name.should == "bar"
     url.should == "#{ENV['USER']}@#{HUB_HOST}:foo/bar.git"    
+  end
+
+  describe "when admin creates a project" do
+    before(:each) do
+      hub("admin", "create-project foo foo-desc")
+    end
+
+    it "should not raise error on missing permissions file for non-admin listing permissions" do
+      lambda { hub("kipper", "list-permissions foo") }.should_not raise_error(Errno::ENOENT)
+    end
+
+    it "should list project permissions for admin" do
+      permissions = hub("admin", "list-permissions foo")
+      permissions.should == ""
+    end
   end
 
   def with_test_project

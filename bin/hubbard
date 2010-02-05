@@ -111,12 +111,13 @@ end
 
 def is_authorized(project_name, action)
   project_dir = find_project_dir(project_name)
-  return false if not File.exist?(project_dir)
+  return false unless File.exist?(project_dir)
   return true if @username == 'admin'
   Dir.chdir(project_dir) do
     if action == 'read' && File.read('.visibility').strip == 'public'
       return true
     end
+    return false unless File.exist?(".permissions")
     File.read(".permissions").split("\n").each do |line|
       permission = line.strip.split('=')
       line_username = permission[0]
@@ -176,7 +177,12 @@ end
 command_file = File.expand_path(File.join(File.dirname(__FILE__), "..", "commands", "#{command}.rb"))
 
 if File.exist?(command_file)
-  load command_file
+  begin
+    load command_file
+  rescue SystemCallError => e
+    $stderr.puts "SystemCallError [#{e.errno}]: #{e.message}"
+    exit e.errno
+  end
 else
   $stderr.puts "Unknown command: #{command}"
   exit 1

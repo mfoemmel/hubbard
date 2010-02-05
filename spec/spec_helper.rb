@@ -26,18 +26,14 @@ def hub(username, command, input=nil)
   else
     result = `#{HUB} #{username} #{command}`
   end
-  if $?.exitstatus != 0
-    raise "Command failed: hub #{username} #{command}\n#{result}"
-  end
+  handle_exitstatus(command, result)
   result
 end
 
 def git(username, command)
   ENV['HUB_USERNAME'] = username
   result = `git #{command}`
-  if $?.exitstatus != 0
-    raise "Command failed: git #{command}:\n#{result}"
-  end
+  handle_exitstatus(command, result)
   result
 end
 
@@ -50,3 +46,11 @@ def list_projects(user)
   hub(user, "list-projects").split("\n").map { |line| line.split[0] }
 end
 
+private
+def handle_exitstatus(command, result)
+  exit_code = $?.exitstatus
+  if exit_code != 0
+    msg = "Command failed [#{exit_code}]: git #{command}:\n#{result}"
+    raise SystemCallError.new(msg, exit_code)
+  end
+end
