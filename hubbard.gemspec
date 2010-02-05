@@ -12,7 +12,7 @@ Gem::Specification.new do |s|
   s.date = %q{2010-01-30}
   s.description = %q{Hubbard is a command line tool for managing git repositories.}
   s.email = %q{git@foemmel.com}
-  s.executables = ["hubbard", "hubbard~", "hubbard"]
+  s.executables = ["hubbard"]
   s.extra_rdoc_files = [
     "LICENSE",
      "README.md"
