@@ -9,6 +9,44 @@ require 'hubbard'
 FileUtils.mkdir_p(Hubbard::PROJECTS_PATH)
 FileUtils.mkdir_p(Hubbard::ACCOUNTS_PATH)
 
+formats = [:text, :yaml]
+defaults = { :format => formats.first }
+options = {}
+OptionParser.new do |opts|
+  opts.banner = <<BANNER
+Usage: hubbard [options] <command>
+
+Projects:
+list-projects
+create-project <project>
+delete-project <project>
+
+Repositories:
+list-repositories <project>
+create-repository <project> <repository>
+delete-repository <project> <repository>
+fork-repository <from-project> <from-repository> <to-project> <to-repository>
+list-forks <project> <repository>
+
+Permissions:
+list-permissions <project>
+add-permission <project> <username> read|write|admin
+remove-permission <project> <username>
+
+Options:
+BANNER
+
+  opts.on("--private", "Create project with visibility set to private") do |o|
+    options[:private] = o
+  end
+  opts.on("-f", "--format [FORMAT]", formats,
+          "Output format (#{formats.join(', ')})") do |o|
+    options[:format] = o
+  end
+end.parse!
+OPTIONS = defaults.merge(options)
+OPTIONS.freeze
+
 def next_arg(msg)
   if ARGV.length < 1
     $stderr.puts msg
@@ -60,21 +98,6 @@ if ENV['SSH_ORIGINAL_COMMAND']
     ARGV << arg
   end
 end
-
-formats = [:text, :yaml]
-defaults = { :format => formats.first }
-options = {}
-OptionParser.new do |opts|
-  opts.on("--private", "Create project with visibility set to private") do |o|
-    options[:private] = o
-  end
-  opts.on("-f", "--format [FORMAT]", formats,
-          "Select format (#{formats.join(', ')})") do |o|
-    options[:format] = o
-  end
-end.parse!
-OPTIONS = defaults.merge(options)
-OPTIONS.freeze
 
 command = next_arg "Please specify a command to run"
 
