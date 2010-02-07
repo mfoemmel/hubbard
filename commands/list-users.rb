@@ -3,7 +3,14 @@ if @username != 'admin'
   exit 3
 end
 
+accounts = []
 Dir.entries(Hubbard::ACCOUNTS_PATH).each do |account|
   next if account == '.' || account == '..'
-  puts account
+  accounts << account
+end
+
+if OPTIONS[:format] == :yaml
+  puts YAML::dump(accounts)
+else
+  accounts.each { |a| puts a }
 end

@@ -248,6 +248,18 @@ describe "Hubble" do
     hub("kipper", "add-key laptop", "ssh-rsa yabbadabba fdsa")
   end
 
+  it "should list users for admin" do
+    hub("kipper", "add-key laptop", "ssh-rsa yabbadabba fdsa")
+    users = hub("admin", "list-users").split("\n").map { |l| l.split[0] }
+    users.size.should == 1
+    users.first.should == "kipper"
+  end
+
+  it "should not list users for non-admin" do
+    hub("kipper", "add-key laptop", "ssh-rsa yabbadabba fdsa")
+    lambda { hub("kipper", "list-users") }.should raise_error
+  end
+
   it "should allow admin to run-as another user" do
     hub("admin", "run-as kipper create-project foo foo-desc")
     projects = list_projects("kipper")

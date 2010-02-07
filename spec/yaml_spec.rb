@@ -37,4 +37,12 @@ describe "Hubble with yaml output" do
     permissions.first[:user].should == "yammer"
     permissions.first[:access].should == "admin"
   end
+
+  it "should list users for admin" do
+    hub("kipper", "add-key laptop", "ssh-rsa yabbadabba fdsa")
+    hub("yammer", "add-key ipad", "ssh-rsa fadadada chacaha")
+    users = YAML::load(hub("admin", "#{YAML_OPTION} list-users"))
+    users.size.should == 2
+    users.should == ["kipper", "yammer"]
+  end
 end
