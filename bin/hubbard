@@ -47,11 +47,6 @@ end.parse!
 OPTIONS = defaults.merge(options)
 OPTIONS.freeze
 
-if ARGV.length < 1 || ARGV == ['help']
-  puts opts
-  exit 0
-end
-
 def next_arg(msg)
   if ARGV.length < 1
     $stderr.puts msg
@@ -102,6 +97,11 @@ if ENV['SSH_ORIGINAL_COMMAND']
   ENV['SSH_ORIGINAL_COMMAND'].split.each do |arg|
     ARGV << arg
   end
+end
+
+if ARGV.empty? || ARGV[0] == 'help'
+  puts opts
+  exit 0
 end
 
 command = next_arg "Please specify a command to run"
