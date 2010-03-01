@@ -47,6 +47,11 @@ end.parse!
 OPTIONS = defaults.merge(options)
 OPTIONS.freeze
 
+if ARGV.length < 1
+  puts opts
+  exit 0
+end
+
 def next_arg(msg)
   if ARGV.length < 1
     $stderr.puts msg
