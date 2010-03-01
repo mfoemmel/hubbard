@@ -47,7 +47,7 @@ end.parse!
 OPTIONS = defaults.merge(options)
 OPTIONS.freeze
 
-if ARGV.length < 1
+if ARGV.length < 1 || ARGV == ['help']
   puts opts
   exit 0
 end
