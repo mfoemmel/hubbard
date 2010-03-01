@@ -43,9 +43,7 @@ BANNER
           "Output format (#{formats.join(', ')})") do |o|
     options[:format] = o
   end
-end.parse!
-OPTIONS = defaults.merge(options)
-OPTIONS.freeze
+end
 
 def next_arg(msg)
   if ARGV.length < 1
@@ -98,6 +96,10 @@ if ENV['SSH_ORIGINAL_COMMAND']
     ARGV << arg
   end
 end
+
+opts.parse!
+OPTIONS = defaults.merge(options)
+OPTIONS.freeze
 
 if ARGV.empty? || ARGV[0] == 'help'
   puts opts
