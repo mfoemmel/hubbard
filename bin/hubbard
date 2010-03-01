@@ -12,7 +12,7 @@ FileUtils.mkdir_p(Hubbard::ACCOUNTS_PATH)
 formats = [:text, :yaml]
 defaults = { :format => formats.first }
 options = {}
-OptionParser.new do |opts|
+opts = OptionParser.new do |opts|
   opts.banner = <<BANNER
 Usage: hubbard [options] <command>
 
