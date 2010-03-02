@@ -11,13 +11,11 @@ authorize(from_project_name, 'admin')
 authorize(to_project_name, 'admin')
 
 if not File.exist?(from_dir)
-  $stderr.puts "Repository not found"
-  exit 4
+  error 4, "Repository not found"
 end
 
 if File.exist?(to_dir)
-  $stderr.puts "Repository already exists with that name"
-  exit 4
+  error 4, "Repository already exists with that name"
 end
 
 FileUtils.mv(from_dir, to_dir)

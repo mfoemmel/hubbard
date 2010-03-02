@@ -2,6 +2,7 @@
 require 'fileutils'
 require 'optparse'
 require 'yaml'
+require 'shellwords'
 
 $:.unshift(File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib')))
 require 'hubbard'
@@ -45,80 +46,53 @@ BANNER
   end
 end
 
+class HubbardException < Exception
+  attr_reader :exitstatus
+  def initialize(exitstatus)
+    @exitstatus = exitstatus
+  end
+end
+
+def error(exitstatus,message)
+  raise HubbardException.new(exitstatus), message
+end
+
 def next_arg(msg)
   if ARGV.length < 1
-    $stderr.puts msg
-    exit 1
+    error 1, msg
   end
   ARGV.shift
 end
 
 def check_status(msg)
   if $!.exitstatus != 0
-    $sderr.puts msg
-    exit 1
+    error $!.exitstatus, msg
   end
 end
 
 def validate_project_name(name)
   if name !~ /#{Hubbard::PROJECT_REGEX}/
-    $stderr.put "Project names can only contain letter, numbers, and hyphens"
-    exit 1
+    error 1, "Project names can only contain letter, numbers, and hyphens"
   end 
 end
 
 def validate_repository_name(name)
   if name !~ /#{Hubbard::REPOSITORY_REGEX}/
-    $stderr.put "Repository names can only contain letter, numbers, and hyphens"
-    exit 1
+    error 1, "Repository names can only contain letter, numbers, and hyphens"
   end 
 end
 
 def validate_user_name(name)
   if name !~ /#{Hubbard::USERNAME_REGEX}/
-    $stderr.put "User names can only contain letter, numbers, and hyphens"
-    exit 1
+    error 1, "User names can only contain letter, numbers, and hyphens"
   end 
 end
 
 def validate_action_name(action)
   unless Hubbard::ACTIONS.member?(action)
-    $stderr.put "Not a valid action (must be one of: read, write, admin)"
-    exit 1
+    error 1, "Not a valid action (must be one of: read, write, admin)"
   end 
 end
-
-username = next_arg "Please specify the username to run as"
-
-if ENV['SSH_ORIGINAL_COMMAND']
-  ARGV.clear
-  ENV['SSH_ORIGINAL_COMMAND'].split.each do |arg|
-    ARGV << arg
-  end
-end
-
-opts.parse!
-OPTIONS = defaults.merge(options)
-OPTIONS.freeze
-
-if ARGV.empty? || ARGV[0] == 'help'
-  puts opts
-  puts
-  exit 0
-end
-
-command = next_arg "Please specify a command to run"
-
-if command == "run-as"
-  if username != "admin"
-    $stderr.puts "You don't have permission to do that"
-    exit 1
-  end
-  username = next_arg "Please specify the username to run as"
-  command = next_arg "Please specify a command to run"
-end
-
-@username = username
 
 def implies(a1, a2)
   case a1
@@ -135,8 +109,7 @@ end
 
 def authorize(project_name, action)
   unless is_authorized(project_name, action)
-    $stderr.puts "You don't have permission to do that"
-    exit 3
+    error 3, "You don't have permission to do that"
   end
 end
 
@@ -205,16 +178,78 @@ def sync_keys
   end
 end
 
-command_file = File.expand_path(File.join(File.dirname(__FILE__), "..", "commands", "#{command}.rb"))
+USERNAME = next_arg "Please specify the username to run as"
 
-if File.exist?(command_file)
-  begin
-    load command_file
-  rescue SystemCallError => e
-    $stderr.puts "SystemCallError [#{e.errno}]: #{e.message}"
-    exit e.errno
+if ENV['SSH_ORIGINAL_COMMAND']
+  ARGV.clear
+  ENV['SSH_ORIGINAL_COMMAND'].split.each do |arg|
+    ARGV << arg
   end
+end
+
+opts.parse!
+OPTIONS = defaults.merge(options)
+OPTIONS.freeze
+
+@opts = opts
+
+def run_command
+  command = next_arg "Please specify a command to run"
+
+  if command == 'help'
+    puts @opts
+    puts
+    return 0
+  end
+
+  @username = USERNAME
+
+  if command == "run-as"
+    if USERNAME != "admin"
+      $stderr.puts "You don't have permission to do that"
+      return 1
+     end 
+    @username = next_arg "Please specify the username to run as"
+    command = next_arg "Please specify a command to run"
+  end
+
+  command_file = File.expand_path(File.join(File.dirname(__FILE__), "..", "commands", "#{command}.rb"))
+
+  if File.exist?(command_file)
+    begin
+      load command_file
+    rescue SystemCallError => e
+      $stderr.puts "SystemCallError [#{e.errno}]: #{e.message}"
+      return e.errno
+    end
+  else
+    $stderr.puts "Unknown command: #{command}"
+    return 1
+  end
+end
+
+if ARGV.empty?
+   while true
+     print "hubbard> "
+     line = readline.strip
+     if line == "exit"
+       exit 0
+     else
+       ARGV.clear
+       Shellwords.shellwords(line).each { |arg| ARGV << arg }
+       next if ARGV.empty?
+       begin
+         run_command
+       rescue HubbardException => e
+         $stderr.puts e.message
+       end
+     end
+   end
 else
-  $stderr.puts "Unknown command: #{command}"
-  exit 1
+  begin
+    exit(run_command)
+  rescue HubbardException => e
+    $stderr.puts e.message
+    exit e.exitstatus
+  end
 end

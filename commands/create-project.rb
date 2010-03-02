@@ -4,8 +4,7 @@ project_name = read_project_name
 description = next_arg "Please specify a project description"
 dir = find_project_dir(project_name)
 if File.exist?(dir)
-  $stderr.puts "Project already exists with that name"
-  exit 4
+  error 4, "Project already exists with that name"
 end
 unless Dir.mkdir(dir)
   $stderr.puts "Unable to create directory: #{dir}"

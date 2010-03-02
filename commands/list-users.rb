@@ -1,6 +1,5 @@
 if @username != 'admin'
-  $stderr.puts "You don't have permission to do that"
-  exit 3
+  error 3, "You don't have permission to do that"
 end
 
 accounts = []

@@ -1,13 +1,11 @@
 name = next_arg("Please specify the key name")
 if name !~ Hubbard::KEY_NAME_REGEX
-  $stderr.puts "Not a valid key name (letters and numbers only)"
-  exit 1
+  error 1, "Not a valid key name (letters and numbers only)"
 end
 
 key = $stdin.read.strip
 if key !~ Hubbard::KEY_REGEX
-  $stderr.puts "Not a valid key"
-  exit 1
+  error 1, "Not a valid key"
 end
 
 type = $1
