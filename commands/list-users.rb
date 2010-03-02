@@ -9,6 +9,8 @@ Dir.entries(Hubbard::ACCOUNTS_PATH).each do |account|
   accounts << account
 end
 
+accounts.sort!
+
 if OPTIONS[:format] == :yaml
   puts YAML::dump(accounts)
 else

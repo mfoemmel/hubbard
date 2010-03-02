@@ -9,6 +9,8 @@ Dir.foreach(Hubbard::PROJECTS_PATH) do |project|
   end
 end
 
+projects = projects.sort_by { |project| project[:name] }
+
 if OPTIONS[:format] == :yaml
   puts YAML::dump(projects)
 else

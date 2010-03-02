@@ -103,6 +103,7 @@ OPTIONS.freeze
 
 if ARGV.empty? || ARGV[0] == 'help'
   puts opts
+  puts
   exit 0
 end
 
