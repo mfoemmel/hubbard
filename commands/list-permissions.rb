@@ -13,7 +13,7 @@ if File.exists?(permissions_file)
   end
 end
 
-if OPTIONS[:format] == :yaml
+if @options[:format] == :yaml
   permissions = []
   contents.split("\n").map do |l|
     l.strip!
@@ -21,6 +21,6 @@ if OPTIONS[:format] == :yaml
     permissions << { :user => p.first, :access => p.last }
   end
   puts YAML::dump(permissions)
-elsif OPTIONS[:format] == :text
+elsif @options[:format] == :text
   puts contents unless contents.empty?
 end

@@ -7,7 +7,7 @@ Dir.foreach(find_project_dir(project_name)) do |repository_dir|
   repositories << { :name => repository_dir.chomp('.git'), :url => git_url }
 end
 
-if OPTIONS[:format] == :yaml
+if @options[:format] == :yaml
   puts YAML::dump(repositories)
 else
   repositories.each { |r| puts "#{r[:name]}\t#{r[:url]}" }

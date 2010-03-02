@@ -10,7 +10,7 @@ end
 
 accounts.sort!
 
-if OPTIONS[:format] == :yaml
+if @options[:format] == :yaml
   puts YAML::dump(accounts)
 else
   accounts.each { |a| puts a }

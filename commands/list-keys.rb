@@ -5,7 +5,7 @@ Dir.entries(dirname).each do |name|
   keys << name
 end
 
-if OPTIONS[:format] == :yaml
+if @options[:format] == :yaml
   puts YAML::dump(keys)
 else
   keys.each { |k| puts k }

@@ -9,7 +9,7 @@ end
 unless Dir.mkdir(dir)
   $stderr.puts "Unable to create directory: #{dir}"
 end
-visibility = OPTIONS[:private] ? "private" : "public"
+visibility = @options[:private] ? "private" : "public"
 if @username != 'admin'
   File.open(File.join(dir, ".permissions"), "w") { |f| f << "#{@username}=admin\n" }
 end

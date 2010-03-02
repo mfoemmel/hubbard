@@ -11,9 +11,9 @@ FileUtils.mkdir_p(Hubbard::PROJECTS_PATH)
 FileUtils.mkdir_p(Hubbard::ACCOUNTS_PATH)
 
 formats = [:text, :yaml]
-defaults = { :format => formats.first }
-options = {}
-opts = OptionParser.new do |opts|
+DEFAULTS = { :format => formats.first }
+OPTIONS = {}
+OPTS = OptionParser.new do |opts|
   opts.banner = <<BANNER
 Usage: hubbard [options] <command>
 
@@ -38,11 +38,11 @@ Options:
 BANNER
 
   opts.on("--private", "Create project with visibility set to private") do |o|
-    options[:private] = o
+    OPTIONS[:private] = o
   end
   opts.on("-f", "--format [FORMAT]", formats,
           "Output format (#{formats.join(', ')})") do |o|
-    options[:format] = o
+    OPTIONS[:format] = o
   end
 end
 
@@ -187,17 +187,15 @@ if ENV['SSH_ORIGINAL_COMMAND']
   end
 end
 
-opts.parse!
-OPTIONS = defaults.merge(options)
-OPTIONS.freeze
-
-@opts = opts
-
 def run_command
+  OPTS.parse!
+  @options = DEFAULTS.merge(OPTIONS)
+  @options.freeze
+
   command = next_arg "Please specify a command to run"
 
   if command == 'help'
-    puts @opts
+    puts OPTS
     puts
     return 0
   end

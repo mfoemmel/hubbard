@@ -11,7 +11,7 @@ end
 
 projects = projects.sort_by { |project| project[:name] }
 
-if OPTIONS[:format] == :yaml
+if @options[:format] == :yaml
   puts YAML::dump(projects)
 else
   projects.each do |p| 
