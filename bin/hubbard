@@ -6,6 +6,7 @@ require 'shellwords'
 
 $:.unshift(File.expand_path(File.join(File.dirname(__FILE__), '..', 'lib')))
 require 'hubbard'
+require 'project'
 
 FileUtils.mkdir_p(Hubbard::PROJECTS_PATH)
 FileUtils.mkdir_p(Hubbard::ACCOUNTS_PATH)
