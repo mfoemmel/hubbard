@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{hubbard}
-  s.version = "0.0.16"
+  s.version = "0.0.17"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matthew Foemmel"]
-  s.date = %q{2010-03-01}
+  s.date = %q{2010-03-25}
   s.default_executable = %q{hubbard}
   s.description = %q{Hubbard is a command line tool for managing git repositories.}
   s.email = %q{git@foemmel.com}
@@ -25,6 +25,7 @@ Gem::Specification.new do |s|
      "README.md",
      "Rakefile",
      "VERSION",
+     "bin/hub-daemon",
      "bin/hubbard",
      "commands/add-key.rb",
      "commands/add-permission.rb",
@@ -49,6 +50,7 @@ Gem::Specification.new do |s|
      "commands/whoami.rb",
      "hubbard.gemspec",
      "lib/hubbard.rb",
+     "lib/project.rb",
      "spec/gitssh",
      "spec/hubbard_spec.rb",
      "spec/spec.opts",
@@ -58,12 +60,12 @@ Gem::Specification.new do |s|
   s.homepage = %q{http://github.com/mfoemmel/hubbard}
   s.rdoc_options = ["--charset=UTF-8"]
   s.require_paths = ["lib"]
-  s.rubygems_version = %q{1.3.5}
+  s.rubygems_version = %q{1.3.6}
   s.summary = %q{Hubbard is a command line tool for managing git repositories.}
   s.test_files = [
-    "spec/yaml_spec.rb",
-     "spec/hubbard_spec.rb",
-     "spec/spec_helper.rb"
+    "spec/hubbard_spec.rb",
+     "spec/spec_helper.rb",
+     "spec/yaml_spec.rb"
   ]
 
   if s.respond_to? :specification_version then
