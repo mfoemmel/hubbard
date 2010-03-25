@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'fileutils'
 
-describe "Hubble" do
+describe "Hubbard" do
   before(:each) do
     reset_file_system
   end
@@ -14,40 +14,44 @@ describe "Hubble" do
     pending "Not sure how to make sure that hubbard is passing back the proper exit codes from SystemCallErrors. Doing so would introduce complexity or add something that shouldn't be callable."
   end
 
-  it "should create project" do
-    hub("kipper", "create-project foo foo-desc")
+  it "should create project and set project description" do
+    hub("kipper", "create-project foo")
+    hub("kipper", "set-description foo foo-desc")
     projects = list_projects('kipper')
     projects.should == ["foo"]
   end
 
   it "should set project description" do
-    hub("kipper", "create-project foo old-desc")
-    hub("kipper", "set-description foo new-desc")
+    hub("kipper", "create-project foo")
+    hub("kipper", "set-description foo 'Test description contains a space.'")
     project = hub("kipper", "list-projects").split("\n")[0].split
-    project[2].should == "new-desc"
+    project_name = project.shift # throw away unused arg.
+    visibility = project.shift # throw away unused arg.
+    description = project.join(' ')
+    description.should == "Test description contains a space."
   end
 
   it "should set project visibility" do
-    hub("kipper", "create-project foo foo-desc")
+    create_project("kipper", "foo", "foo-desc")
     hub("kipper", "set-visibility foo private")
     project = hub("kipper", "list-projects").split("\n")[0].split
     project[1].should == "private"
   end
 
   it "should rename project" do
-    hub("kipper", "create-project foo foo-desc")
+    create_project("kipper", "foo", "foo-desc")
     hub("kipper", "rename-project foo bar")
     project = hub("kipper", "list-projects").split("\n")[0].split
     project[0].should == "bar"
   end
 
   it "should not allow multiple projects with same name" do
-    hub("kipper", "create-project foo foo-desc")
+    create_project("kipper", "foo", "foo-desc")
     lambda { hub("kipper", "create-project foo") }.should raise_error
   end
 
   it "should delete project" do
-    hub("kipper", "create-project foo foo-desc")
+    create_project("kipper", "foo", "foo-desc")
     hub("kipper", "delete-project foo")
 
     projects = hub("kipper", "list-projects").split("\n")
@@ -55,7 +59,7 @@ describe "Hubble" do
   end
 
   it "should default to public project" do
-    hub("kipper", "create-project foo foo-desc")
+    create_project("kipper", "foo", "foo-desc")
 
     # Other users can see...
     projects = list_projects("tiger")
@@ -66,7 +70,8 @@ describe "Hubble" do
   end
 
   it "should support private project" do
-    hub("kipper", "create-project foo foo-desc --private")
+    hub("kipper", "create-project foo --private")
+    hub("kipper", "set-description foo new-desc")
 
     # Other users can't see
     projects = hub("tiger", "list-projects").split("\n")
@@ -74,7 +79,7 @@ describe "Hubble" do
   end
 
   it "should create repositories" do
-    hub("kipper", "create-project foo foo-desc")
+    create_project("kipper", "foo", "foo-desc")
     hub("kipper", "create-repository foo bar")
 
     repositories = hub("kipper", "list-repositories foo").split("\n")
@@ -86,7 +91,7 @@ describe "Hubble" do
 
   describe "when admin creates a project" do
     before(:each) do
-      hub("admin", "create-project foo foo-desc")
+      create_project("admin", "foo", "foo-desc")
     end
 
     it "should not raise error on missing permissions file for non-admin listing permissions" do
@@ -111,7 +116,7 @@ describe "Hubble" do
   end
 
   it "should allow git push" do
-    hub("kipper", "create-project foo foo-desc")
+    create_project("kipper", "foo", "foo-desc")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -120,8 +125,8 @@ describe "Hubble" do
   end
 
   it "should move repository" do
-    hub("kipper", "create-project foo foo-desc")
-    hub("kipper", "create-project new-foo foo-desc")
+    create_project("kipper", "foo", "foo-desc")
+    create_project("kipper", "new-foo", "foo-desc")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -132,7 +137,7 @@ describe "Hubble" do
   end
 
   it "should allow git push with write permissions" do
-    hub("kipper", "create-project foo foo-desc")
+    create_project("kipper", "foo", "foo-desc")
     hub("kipper", "add-permission foo tiger write")
     hub("kipper", "create-repository foo bar")
 
@@ -142,7 +147,7 @@ describe "Hubble" do
   end
 
   it "should not allow git push with read permissions" do
-    hub("kipper", "create-project foo foo-desc")
+    create_project("kipper", "foo", "foo-desc")
     hub("kipper", "add-permission foo tiger read")
     hub("kipper", "create-repository foo bar")
 
@@ -152,7 +157,7 @@ describe "Hubble" do
   end
 
   it "should allow git pull" do
-    hub("kipper", "create-project foo foo-desc")
+    create_project("kipper", "foo", "foo-desc")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -162,7 +167,8 @@ describe "Hubble" do
   end
 
   it "should not allow git pull with no permissions" do
-    hub("kipper", "create-project foo foo-desc --private")
+    hub("kipper", "create-project foo --private")
+    hub("kipper", "set-description foo foo-desc")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -182,7 +188,7 @@ describe "Hubble" do
   end
 
   it "should fork repository in same project" do
-    hub("kipper", "create-project foo foo-desc")
+    create_project("kipper", "foo", "foo-desc")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -193,8 +199,8 @@ describe "Hubble" do
   end
 
   it "should fork repository in different project" do
-    hub("kipper", "create-project foo foo-desc")
-    hub("kipper", "create-project foo2 foo2-desc")
+    create_project("kipper", "foo", "foo-desc")
+    create_project("kipper", "foo2", "foo2-desc")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -205,7 +211,7 @@ describe "Hubble" do
   end
 
   it "should track projects related by forking" do
-    hub("kipper", "create-project foo foo-desc")
+    create_project("kipper", "foo", "foo-desc")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -216,8 +222,8 @@ describe "Hubble" do
   end
 
   it "should require read access to fork repository" do
-    hub("kipper", "create-project foo foo-desc")
-    hub("kipper", "create-project foo2 foo-desc")
+    create_project("kipper", "foo", "foo-desc")
+    create_project("kipper", "foo2", "foo2-desc")
     hub("kipper", "create-repository foo bar")
 
     with_test_project do
@@ -234,7 +240,7 @@ describe "Hubble" do
   end
 
   it "should remove permission" do
-    hub("kipper", "create-project foo foo-desc")
+    create_project("kipper", "foo", "foo-desc")
     hub("kipper", "create-repository foo bar")
     hub("kipper", "add-permission foo tiger read")
     hub("kipper", "remove-permission foo tiger")
@@ -261,7 +267,8 @@ describe "Hubble" do
   end
 
   it "should allow admin to run-as another user" do
-    hub("admin", "run-as kipper create-project foo foo-desc")
+    hub("admin", "run-as kipper create-project foo")
+    hub("admin", "run-as kipper set-description foo foo-desc")
     projects = list_projects("kipper")
     projects.should == ["foo"]
   end

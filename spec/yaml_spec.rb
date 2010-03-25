@@ -12,16 +12,16 @@ describe "Hubble with yaml output" do
   end
 
   it "should list-projects" do
-    hub("yammer", "create-project a a-desc")
-    hub("yammer", "create-project b b-desc")
-    hub("yammer", "create-project c c-desc")
+    create_project("yammer", "a", "a-desc")
+    create_project("yammer", "b", "b-desc")
+    create_project("yammer", "c", "c-desc")
 
     projects = YAML::load(hub("yammer", "#{YAML_OPTION} list-projects")).map{|project|project[:name]}
     projects.should == ["a", "b", "c"]
   end
 
   it "should list repositories" do
-    hub("yammer", "create-project a a-desc")
+    create_project("yammer", "a", "a-desc")
     hub("yammer", "create-repository a b")
 
     repositories = YAML::load(hub("yammer", "#{YAML_OPTION} list-repositories a"))
@@ -31,7 +31,7 @@ describe "Hubble with yaml output" do
   end
 
   it "should list permissions" do
-    hub("yammer", "create-project a a-desc")
+    create_project("yammer", "a", "a-desc")
     permissions = YAML::load(hub("yammer", "#{YAML_OPTION} list-permissions a"))
     permissions.length.should == 1
     permissions.first[:user].should == "yammer"

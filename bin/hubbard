@@ -65,6 +65,13 @@ def next_arg(msg)
   ARGV.shift
 end
 
+def rest_args(msg)
+  if ARGV.length < 1
+    error 1, msg
+  end
+  ARGV
+end
+
 def check_status(msg)
   if $!.exitstatus != 0
     error $!.exitstatus, msg

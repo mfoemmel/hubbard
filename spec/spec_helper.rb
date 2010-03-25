@@ -42,6 +42,12 @@ def reset_file_system
   FileUtils.rm_rf "tmp"
 end
 
+# Simple helper to create a public project with a description.
+def create_project(user, project_name, project_desc)
+  hub(user, "create-project #{project_name}")
+  hub(user, "set-description #{project_name} #{project_desc}")
+end
+
 def list_projects(user)
   hub(user, "list-projects").split("\n").map { |line| line.split[0] }
 end
