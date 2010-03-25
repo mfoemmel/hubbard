@@ -8,6 +8,6 @@ if @options[:format] == :yaml
   puts YAML::dump(permissions)
 elsif @options[:format] == :text
   permissions.each do |permission|
-    puts "#{permission['user']}=#{permission['access']}"
+    puts "#{permission[:user]}=#{permission[:access]}"
   end
 end
