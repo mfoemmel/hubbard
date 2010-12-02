@@ -12,11 +12,10 @@ type commit struct {
 
 type repo interface {
 	log() <-chan *commit
+	update(sha1 string)
 }
 
-func findRepo(name string) repo {
-	dir := path.Join("data", "repos", name)
-
+func findRepo(dir string) repo {
 	if exists(path.Join(dir, ".hg")) {
 		return &hgRepo{dir}
 	} else if exists(path.Join(dir, ".git")) {

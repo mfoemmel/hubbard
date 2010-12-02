@@ -36,3 +36,7 @@ func (self *hgRepo) log() <-chan *commit {
 	}()
 	return c
 }
+
+func (self *hgRepo) update(sha1 string) {
+	run(os.Stdout, nil, self.dir, []string { findExe("hg"), "update", "-C", sha1 })
+}

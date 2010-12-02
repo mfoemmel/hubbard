@@ -43,3 +43,7 @@ func (self *gitRepo) log() <-chan *commit {
 	}()
 	return c
 }
+
+func (self *gitRepo) update(sha1 string) {
+	run(os.Stdout, nil, self.dir, []string { findExe("git"), "checkout", sha1 })
+}

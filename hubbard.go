@@ -4,6 +4,7 @@ import "log"
 import "http"
 import "strings"
 import "os"
+import "path"
 
 func projectList(w http.ResponseWriter, req *http.Request) {
 	fd, err := os.Open("data/repos", os.O_RDONLY, 0)
@@ -38,7 +39,7 @@ func projectHandler(w http.ResponseWriter, req *http.Request) {
 		// Build the project
 		req.ParseForm()
 		sha1 := getParameter(req, "sha1")
-		builder := newBuilder("go", sha1)
+		builder := newBuilder(projectName, sha1)
 		builder <- buildCmd{}
 		c := make(chan []byte, 100)
 		builder <- viewCmd{c}
@@ -48,7 +49,7 @@ func projectHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	repo := findRepo(projectName)
+	repo := findRepo(path.Join("data", "repos", projectName))
 	out := newHtmlWriter(w)
 	out.table()
 	for c := range repo.log() {
@@ -56,7 +57,7 @@ func projectHandler(w http.ResponseWriter, req *http.Request) {
 		{
 			out.td()
 			{
-				out.raw(`<form action="build?sha1=` + c. sha1 + `" method="post"><input type="submit" value="build"/></form>`)
+				out.raw(`<form action="?sha1=` + c. sha1 + `" method="post"><input type="submit" value="build"/></form>`)
 			}
 			out.end()
 
