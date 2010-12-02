@@ -17,6 +17,11 @@ type repo interface {
 func findRepo(name string) repo {
 	dir := path.Join("data", "repos", name)
 
-	// todo check for git/hg/etc
-	return &hgRepo{dir}
+	if exists(path.Join(dir, ".hg")) {
+		return &hgRepo{dir}
+	} else if exists(path.Join(dir, ".git")) {
+		return &gitRepo{dir}
+	}
+
+	panic("Unknown repository type")
 }

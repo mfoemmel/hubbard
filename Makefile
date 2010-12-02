@@ -4,6 +4,7 @@ TARG=hubbard
 GOFILES=\
 	build.go\
 	exec.go\
+	git.go\
 	hg.go\
 	html.go\
 	http.go\

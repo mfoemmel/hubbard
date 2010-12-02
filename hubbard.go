@@ -1,7 +1,6 @@
 package hubbard
 
 import "log"
-import "html"
 import "http"
 import "strings"
 import "os"
@@ -78,7 +77,7 @@ func projectHandler(w http.ResponseWriter, req *http.Request) {
 
 		out.tr()
 		{
-			out.td().with("colspan", "6").text(html.EscapeString(c.comment)).end()
+			out.td().with("colspan", "6").text(c.comment).end()
 		}
 		out.end()
 	}
