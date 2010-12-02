@@ -6,9 +6,34 @@ import "http"
 import "strings"
 import "os"
 
+func projectList(w http.ResponseWriter, req *http.Request) {
+	fd, err := os.Open("data/repos", os.O_RDONLY, 0)
+	if err != nil {
+		panic(err)
+	}
+	projects, err := fd.Readdirnames(-1)
+	if err != nil {
+		panic(err)
+	}
+	out := newHtmlWriter(w)
+	for _, project := range projects {
+		out.raw("<a href=\"" + project + "\">")
+		out.text(project)
+		out.raw("</a>")
+		out.raw("<br/>")
+	}
+}
+
 func projectHandler(w http.ResponseWriter, req *http.Request) {
-	// todo extract project name from URL
-	projectName := "go"
+	projectName := req.URL.Path[1:]
+	if projectName == "favicon.ico" {
+		return
+	}
+
+	if projectName == "" {
+		projectList(w, req)
+		return
+	}
 
 	if req.Method == "POST" {
 		// Build the project
@@ -25,7 +50,6 @@ func projectHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	repo := findRepo(projectName)
-				
 	out := newHtmlWriter(w)
 	out.table()
 	for c := range repo.log() {
@@ -43,8 +67,8 @@ func projectHandler(w http.ResponseWriter, req *http.Request) {
 			out.td().text(strings.Join(c.tags, ",")).end()
 			out.td().text(c.timestamp).end()
 			
-			pkg := "data/packages/" + projectName + "/" + c.sha1 + ".tar.gz"
-			if exists(pkg) {
+			pkg := "/packages/" + projectName + "/" + c.sha1 + ".tar.gz"
+			if exists("data" + pkg) {
 				w.Write([]byte(`<td><a href="` + pkg + `">download</a></td>`))
 			} else {
 				out.td().end()
@@ -63,6 +87,7 @@ func projectHandler(w http.ResponseWriter, req *http.Request) {
 
 func Run() {
 	http.HandleFunc("/", projectHandler)
+	http.Handle("/packages/", http.FileServer("data/packages", "/packages/"))
 	log.Println("Listening on port 4788")
 	err := http.ListenAndServe(":4788", nil)
 	if err != nil {
