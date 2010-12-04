@@ -37,6 +37,14 @@ func (self *hgRepo) log() <-chan *commit {
 	return c
 }
 
+func (self *hgRepo) logComment(sha1 string) (string, bool) {
+	panic("not implemented")
+}
+
+func (self *hgRepo) readFile(sha1 string, filename string) (string, bool) {
+	panic("not implemented")
+}
+
 func (self *hgRepo) update(sha1 string) {
 	run(os.Stdout, nil, self.dir, []string { findExe("hg"), "update", "-C", sha1 })
 }

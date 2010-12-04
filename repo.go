@@ -12,7 +12,10 @@ type commit struct {
 
 type repo interface {
 	log() <-chan *commit
+	logComment(sha1 string) (string, bool)
+	readFile(sha1 string, filename string) (string,bool)
 	update(sha1 string)
+	
 }
 
 func findRepo(dir string) repo {

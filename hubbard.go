@@ -1,7 +1,7 @@
 package hubbard
 
-import "log"
 import "http"
+import "log"
 import "strings"
 import "os"
 import "path"
@@ -24,31 +24,7 @@ func projectList(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func projectHandler(w http.ResponseWriter, req *http.Request) {
-	projectName := req.URL.Path[1:]
-	if projectName == "favicon.ico" {
-		return
-	}
-
-	if projectName == "" {
-		projectList(w, req)
-		return
-	}
-
-	if req.Method == "POST" {
-		// Build the project
-		req.ParseForm()
-		sha1 := getParameter(req, "sha1")
-		builder := newBuilder(projectName, sha1)
-		builder <- buildCmd{}
-		c := make(chan []byte, 100)
-		builder <- viewCmd{c}
-		for line := range c {
-			os.Stdout.Write(line)
-		}
-		return
-	}
-
+func projectSummary(w http.ResponseWriter, req *http.Request, projectName string) {
 	repo := findRepo(path.Join("data", "repos", projectName))
 	out := newHtmlWriter(w)
 	out.table()
@@ -62,7 +38,7 @@ func projectHandler(w http.ResponseWriter, req *http.Request) {
 			out.end()
 
 			out.td().text(c.timestamp).end()
-			out.td().text(c.sha1[0:6]).end()
+			out.td().raw(`<a href="` + projectName + "/" + c.sha1 + `">` + c.sha1[0:6] + `</a>`).end()
 			out.td().text(c.author).end()
 			out.td().text(strings.Join(c.tags, ",")).end()
 			out.td().text(c.timestamp).end()
@@ -83,6 +59,70 @@ func projectHandler(w http.ResponseWriter, req *http.Request) {
 		out.end()
 	}
 	out.end()
+}
+
+func revisionSummary(w http.ResponseWriter, req *http.Request, projectName string, sha1 string) {
+	repo := findRepo(path.Join("data", "repos", projectName))
+	out := newHtmlWriter(w)
+
+	comment, ok := repo.logComment(sha1)
+	if !ok {
+		out.text("error retrieving commit comment")
+		return
+	}
+	out.text(comment)
+	out.raw("<br/>")
+	info, ok := repo.readFile(sha1, "package.hub")
+	if !ok {
+		out.text("error retrieving info file")
+		return
+	}
+	out.pre(info)
+}
+ 
+func projectHandler(w http.ResponseWriter, req *http.Request) {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Println("ERROR", r)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}()
+
+	if req.URL.Path == "/favicon.ico" {
+		return
+	}
+
+	segments := strings.Split(req.URL.Path[1:], "/", -1)
+	if segments[0] == "" {
+		segments = segments[1:]
+	}
+	projectName := req.URL.Path[1:]
+
+	if req.Method == "POST" {
+		// Build the project
+		req.ParseForm()
+		sha1 := getParameter(req, "sha1")
+		builder := newBuilder(projectName, sha1)
+		builder <- buildCmd{}
+		c := make(chan []byte, 100)
+		builder <- viewCmd{c}
+		for line := range c {
+			os.Stdout.Write(line)
+		}
+		return
+	}
+
+	switch len(segments) {
+	case 0:
+		projectList(w, req)
+		return
+	case 1:
+		projectSummary(w, req, segments[0])
+		return
+	case 2:
+		revisionSummary(w, req, segments[0], segments[1])
+		return
+	}
 }
 
 func Run() {

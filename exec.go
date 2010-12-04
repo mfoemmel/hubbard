@@ -1,10 +1,20 @@
 package hubbard
 
+import "bytes"
 import "io"
 import "fmt"
 import "os"
 import "path"
 import "strings"
+
+func capture(dir string, argv []string) (string, bool) {
+	argv[0] = findExe(argv[0])
+	buf := bytes.NewBuffer(nil)
+	if run(buf, nil, dir, argv) {
+		return buf.String(), true
+	}
+	return "", false
+}
 
 func run(w io.Writer, env []string, dir string, argv []string) bool {
 	if !exists(dir) {

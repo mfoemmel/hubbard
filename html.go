@@ -57,6 +57,12 @@ func (self *htmlWriter) text(text string) *htmlWriter {
 	return self
 }
 
+func (self *htmlWriter) pre(text string) *htmlWriter {
+	self.checkFirst()
+	io.WriteString(self.w, "<pre>" + html.EscapeString(text) + "</pre>")
+	return self
+}
+
 func (self *htmlWriter) end() *htmlWriter {
 	self.checkFirst()
 	io.WriteString(self.w, `</` + self.pop() + `>`)

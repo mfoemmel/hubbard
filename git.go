@@ -44,6 +44,14 @@ func (self *gitRepo) log() <-chan *commit {
 	return c
 }
 
+func (self *gitRepo) logComment(sha1 string) (string, bool) {
+	return capture(self.dir, []string{ "git", "show", "-s", `--format=%B`, sha1})
+}
+
+func (self *gitRepo) readFile(sha1 string, filename string) (string, bool) {
+	return capture(self.dir, []string{ "git", "show", sha1 + ":" + filename})
+}
+
 func (self *gitRepo) update(sha1 string) {
 	run(os.Stdout, nil, self.dir, []string { findExe("git"), "checkout", sha1 })
 }
