@@ -3,6 +3,7 @@ package hubbard
 import "bufio"
 import "io"
 import "os"
+import "path"
 import "strings"
 
 type hgRepo struct {
@@ -38,13 +39,32 @@ func (self *hgRepo) log() <-chan *commit {
 }
 
 func (self *hgRepo) logComment(sha1 string) (string, bool) {
-	panic("not implemented")
+	return capture(self.dir, []string{ "hg", "log", "--template", `{desc}`, "--rev", sha1})
 }
 
 func (self *hgRepo) readFile(sha1 string, filename string) (string, bool) {
-	panic("not implemented")
+	return "error", false
 }
 
 func (self *hgRepo) update(sha1 string) {
 	run(os.Stdout, nil, self.dir, []string { findExe("hg"), "update", "-C", sha1 })
+}
+
+func (self *hgRepo) resolve(ref string) (sha1 string) {
+	file, err := os.Open(path.Join(self.dir, ".hgtags"), os.O_RDONLY, 0)
+	if err != nil {
+		panic(err)
+	}
+	in := bufio.NewReader(file)
+	for {
+		line, err := in.ReadString('\n')
+		if err != nil {
+			panic(err)
+		}
+		fields := strings.Split(line, " ", 2)
+		if strings.TrimSpace(fields[1]) == ref {
+			return fields[0]
+		}
+	}
+	panic("unreachable")
 }

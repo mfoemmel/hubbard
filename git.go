@@ -55,3 +55,7 @@ func (self *gitRepo) readFile(sha1 string, filename string) (string, bool) {
 func (self *gitRepo) update(sha1 string) {
 	run(os.Stdout, nil, self.dir, []string { findExe("git"), "checkout", sha1 })
 }
+
+func (self *gitRepo) resolve(ref string) (sha1 string) {
+	panic("not implemented")
+}

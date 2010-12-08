@@ -2,7 +2,7 @@ package hubbard
 
 import "bufio"
 import "os"
-import "path"
+//import "path"
 
 type buildCmd struct {
 }
@@ -45,6 +45,7 @@ func build(project string, sha1 string, builder chan<- interface{}) {
 	}
 	dir := cwd + "/data/working/" + project
 	findRepo(dir).update(sha1)
+/*
 	buildDir := dir + "/src"
 	command := []string { "/bin/bash", dir + "/src/all.bash" }
 	if exists(path.Join(dir, "Makefile")) {
@@ -52,8 +53,11 @@ func build(project string, sha1 string, builder chan<- interface{}) {
 		command = []string { findExe("make") }
 	}
 	if buildExec(buildDir, command, builder) {
-		run(os.Stdout, nil, dir, []string { findExe("tar"), "-cvf", cwd + "/data/packages/" + project + "/" + sha1 + ".tar.gz", "--exclude", ".hg", "." })
+*/
+		run(os.Stdout, nil, dir, []string { findExe("tar"), "-cvf", cwd + "/data/packages/" + project + "/" + sha1 + ".tar.gz", "--exclude", ".hg", "--exclude", ".git", "." })
+/*
 	}
+*/
 }
 
 func buildExec(dir string, argv []string, builder chan <- interface{}) bool {

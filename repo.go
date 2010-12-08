@@ -15,7 +15,7 @@ type repo interface {
 	logComment(sha1 string) (string, bool)
 	readFile(sha1 string, filename string) (string,bool)
 	update(sha1 string)
-	
+	resolve(ref string) (sha1 string)
 }
 
 func findRepo(dir string) repo {
