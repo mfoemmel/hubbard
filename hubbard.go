@@ -1,6 +1,5 @@
 package hubbard
 
-import "io"
 import "http"
 import "log"
 import "strings"
@@ -126,28 +125,13 @@ func projectHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func resolveHandler(w http.ResponseWriter, req *http.Request) {
-	defer func() {
-		if r := recover(); r != nil {
-			log.Println("ERROR", r)
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-	}()
-
-	w.SetHeader("Content-Type", "text/plain")
-	req.ParseForm()
-	projectName := getParameter(req, "project")
-	ref := getParameter(req, "ref")
-	repo := findRepo(path.Join("data", "repos", projectName))
-	io.WriteString(w, repo.resolve(ref) + "\n")
-}
-
 func Run() {
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
-		case "update":
-			cmdUpdate()
+		case "resolve":
+			cmdResolve()
 		}
+		os.Exit(1)
 	}
 	http.HandleFunc("/", projectHandler)
 	http.HandleFunc("/resolve", resolveHandler)

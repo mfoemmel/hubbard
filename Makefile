@@ -3,14 +3,15 @@ include $(GOROOT)/src/Make.inc
 TARG=hubbard
 GOFILES=\
 	build.go\
-	cmd_update.go\
 	exec.go\
 	git.go\
 	hg.go\
+	io.go\
 	html.go\
 	http.go\
 	hubbard.go\
 	repo.go\
+	resolve.go\
 
 hub: hub.$(O)
 	$(LD) -L _obj -o hub hub.$(O)

@@ -3,7 +3,6 @@ package hubbard
 import "bufio"
 import "io"
 import "os"
-import "path"
 import "strings"
 
 type hgRepo struct {
@@ -51,20 +50,21 @@ func (self *hgRepo) update(sha1 string) {
 }
 
 func (self *hgRepo) resolve(ref string) (sha1 string) {
-	file, err := os.Open(path.Join(self.dir, ".hgtags"), os.O_RDONLY, 0)
+	branches, err := captureLines(self.dir, []string{ "hg", "branches", "--debug" })
 	if err != nil {
 		panic(err)
 	}
-	in := bufio.NewReader(file)
-	for {
-		line, err := in.ReadString('\n')
-		if err != nil {
-			panic(err)
-		}
+
+	tags, err := captureLines(self.dir, []string{ "hg", "tags", "--debug" })
+	if err != nil {
+		panic(err)
+	}
+
+	for _, line := range append(branches, tags...) {
 		fields := strings.Split(line, " ", 2)
-		if strings.TrimSpace(fields[1]) == ref {
-			return fields[0]
+		if strings.TrimSpace(fields[0]) == ref {
+			return strings.Split(strings.TrimSpace(fields[1]), ":", 2)[1]
 		}
 	}
-	panic("unreachable")
+	panic("ref not found: " + ref)
 }

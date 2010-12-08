@@ -25,5 +25,5 @@ func findRepo(dir string) repo {
 		return &gitRepo{dir}
 	}
 
-	panic("Unknown repository type")
+	panic("unknown repository type for directory: " + dir)
 }

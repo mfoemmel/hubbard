@@ -16,6 +16,44 @@ func capture(dir string, argv []string) (string, bool) {
 	return "", false
 }
 
+// Executes the command in the specified directory and returns the lines
+// written to standard out as a slice of strings
+func captureLines(dir string, argv []string) ([]string, os.Error) {
+	if !exists(dir) {
+		return nil, os.NewError("directory doesn't exist: " + dir)
+	}
+
+	argv[0] = findExe(argv[0])
+
+	pipeIn, pipeOut := pipe()
+
+	pid, err := os.ForkExec(argv[0], argv, os.Environ(), dir, []*os.File{ os.Stdin, pipeOut, os.Stderr })
+	if err != nil {
+		return nil, err
+	}
+
+	err = pipeOut.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	lines, err := readLines(pipeIn)
+	if err != nil {
+		return nil, err
+	}
+
+	msg, err := os.Wait(pid, 0)
+	if err != nil {
+		return nil, err
+	}
+
+	if msg.WaitStatus != 0 {
+		return nil, os.NewError("process failed")
+	}
+
+	return lines, nil
+}
+
 func run(w io.Writer, env []string, dir string, argv []string) bool {
 	if !exists(dir) {
 		panic("directory doesn't exist: " + dir)
