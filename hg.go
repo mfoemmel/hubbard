@@ -1,9 +1,19 @@
 package hubbard
 
 import "bufio"
-import "io"
+import "exec"
 import "os"
 import "strings"
+
+var hg string
+
+func init() {
+	var err os.Error
+	hg, err = exec.LookPath("hg")
+	if err != nil {
+		panic("hg not found on PATH")
+	}
+}
 
 type hgRepo struct {
 	dir string
@@ -11,27 +21,34 @@ type hgRepo struct {
 
 func (self *hgRepo) log() <-chan *commit {
 	c := make(chan *commit, 100)
-	pipeIn, pipeOut := io.Pipe()
-	go func() {
-		argv := []string{ findExe("hg"), "log", "--template", `{date|isodate}\t{node}\t{author}\t{tags}\t{desc|firstline}\n`, "-b", "default"} 
-		run(pipeOut, nil, self.dir, argv)
-		pipeOut.Close()
-	}()
 	go func() {
 		defer close(c)
-		in := bufio.NewReader(pipeIn)
+		argv := []string { hg, "log", "--template", `{date|isodate}\t{node}\t{author}\t{tags}\t{desc|firstline}\n`, "-b", "default"} 
+		cmd, err := exec.Run(hg, argv, nil, self.dir, exec.DevNull, exec.Pipe, exec.PassThrough)
+		if err != nil {
+			panic(err)
+		}
+		r := bufio.NewReader(cmd.Stdout)
 		for {
-			line, err := in.ReadBytes('\n')
+			line, err := r.ReadString('\n')
+			if line != "" {
+				fields := strings.Split(string(line), "\t", -1)
+				tags := strings.Split(fields[3], " ", -1)
+				c <- &commit{fields[0], fields[1], fields[2], fields[4], tags}		
+			}
 			if err == os.EOF {
 				break
 			}
 			if err != nil {
 				panic(err)
 			}
-			
-			fields := strings.Split(string(line), "\t", -1)
-			tags := strings.Split(fields[3], " ", -1)
-			c <- &commit{fields[0], fields[1], fields[2], fields[4], tags}		
+		}
+		msg, err := cmd.Wait(0)
+		if err != nil {
+			panic(err)
+		}
+		if msg.WaitStatus != 0 {
+			panic("process failed")
 		}
 	}()
 	return c
