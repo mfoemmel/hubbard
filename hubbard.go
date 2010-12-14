@@ -25,6 +25,7 @@ func projectList(w http.ResponseWriter, req *http.Request) {
 }
 
 func projectSummary(w http.ResponseWriter, req *http.Request, projectName string) {
+	project := &project{projectName}
 	repo := findRepo(path.Join("data", "repos", projectName))
 	out := newHtmlWriter(w)
 	out.table()
@@ -46,6 +47,12 @@ func projectSummary(w http.ResponseWriter, req *http.Request, projectName string
 			pkg := "/packages/" + projectName + "/" + c.sha1 + ".tar.gz"
 			if exists("data" + pkg) {
 				w.Write([]byte(`<td><a href="` + pkg + `">download</a></td>`))
+			} else {
+				out.td().end()
+			}
+			
+			if exists(project.getLogFile(c.sha1)) {
+				w.Write([]byte(`<td><a href="` + "/logs/" + projectName + "/" + c.sha1 + ".log" + `">log</a></td>`))
 			} else {
 				out.td().end()
 			}
@@ -136,6 +143,7 @@ func Run() {
 	http.HandleFunc("/", projectHandler)
 	http.HandleFunc("/resolve", resolveHandler)
 	http.Handle("/packages/", http.FileServer("data/packages", "/packages/"))
+	http.Handle("/logs/", http.FileServer("data/build", "/logs/"))
 	log.Println("Listening on port 4788")
 	err := http.ListenAndServe(":4788", nil)
 	if err != nil {

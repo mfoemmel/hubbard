@@ -55,13 +55,27 @@ func build(project string, sha1 string, builder chan<- interface{}) {
 		panic(err)
 	}
 	dir := cwd + "/data/working/" + project
-	log, err := os.Open(path.Join(cwd, "data", "build", project, sha1 + ".log"), os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0666)
+	
+	logDir := path.Join(cwd, "data", "build", project)
+	err = os.MkdirAll(logDir, 0777)
+	if err != nil {
+		panic(err)
+	}
+
+	log, err := os.Open(path.Join(logDir, sha1 + ".log"), os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0666)
 	if err != nil {
 		panic(err)
 	}
 
 	findRepo(dir).update(sha1)
-	argv := []string{ tar, "-cvf", cwd + "/data/packages/" + project + "/" + sha1 + ".tar.gz", "--exclude", ".hg", "--exclude", ".git", "." }
+
+	packageDir := path.Join(cwd, "data", "packages", project)
+	err = os.MkdirAll(packageDir, 0777)
+	if err != nil {
+		panic(err)
+	}
+
+	argv := []string{ tar, "-cvf", path.Join(packageDir, sha1 + ".tar.gz"), "--exclude", ".hg", "--exclude", ".git", "." }
 	cmd, err := exec.Run(tar, argv, nil, dir, exec.DevNull, exec.Pipe, exec.MergeWithStdout)
 	if err != nil {
 		panic(err)

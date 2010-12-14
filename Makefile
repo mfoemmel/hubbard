@@ -10,6 +10,7 @@ GOFILES=\
 	html.go\
 	http.go\
 	hubbard.go\
+	project.go\
 	repo.go\
 	resolve.go\
 
