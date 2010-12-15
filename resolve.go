@@ -71,7 +71,10 @@ func cmdResolve() {
 		}
 	}
 
-	println(buf.String())
+	err = ioutil.WriteFile("package.hub", buf.Bytes(), 0666)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func resolve(project string, ref string) (string, os.Error) {
