@@ -35,16 +35,18 @@ func copyToArchive(basedir string, path string, archive *tar.Writer) os.Error {
 	}
 
 	if isDirectory(basedir + path) {
-    if path != "" {
-      header, err := createTarHeader(basedir,  path + "/")
-      if err != nil {
-        panic(err)
-      }
-      err = archive.WriteHeader(header)
-      if err != nil {
-        panic(err)
-      }
-    }
+		if path != "" {
+			header, err := createTarHeader(basedir, path+"/")
+			header.Typeflag = tar.TypeDir
+			header.Size = 0
+			if err != nil {
+				panic(err)
+			}
+			err = archive.WriteHeader(header)
+			if err != nil {
+				panic(err)
+			}
+		}
 
 		children, err := list(basedir + path)
 		if err != nil {
