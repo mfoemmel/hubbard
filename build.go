@@ -1,7 +1,6 @@
 package hubbard
 
 import "bufio"
-import "exec"
 import "os"
 import "path"
 
@@ -39,16 +38,6 @@ func newBuilder(project string, sha1 string) chan<- interface{} {
 	return c
 }
 
-var tar string
-
-func init() {
-	var err os.Error
-	tar, err = exec.LookPath("tar")
-	if err != nil {
-		panic(err)
-	}
-}
-
 func build(project string, sha1 string, builder chan<- interface{}) {
 	cwd, err := os.Getwd()
 	if err != nil {
@@ -62,10 +51,10 @@ func build(project string, sha1 string, builder chan<- interface{}) {
 		panic(err)
 	}
 
-	log, err := os.Open(path.Join(logDir, sha1 + ".log"), os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0666)
-	if err != nil {
-		panic(err)
-	}
+	//_, err := os.Open(path.Join(logDir, sha1 + ".log"), os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0666)
+	//if err != nil {
+	//	panic(err)
+	//}
 
 	findRepo(dir).update(sha1)
 
@@ -75,12 +64,14 @@ func build(project string, sha1 string, builder chan<- interface{}) {
 		panic(err)
 	}
 
-	argv := []string{ tar, "-cvf", path.Join(packageDir, sha1 + ".tar.gz"), "--exclude", ".hg", "--exclude", ".git", "." }
-	cmd, err := exec.Run(tar, argv, nil, dir, exec.DevNull, exec.Pipe, exec.MergeWithStdout)
+  println("packaging " + dir + " as " + path.Join(packageDir, sha1 + ".tar.gz"))
+  err = archive(dir, path.Join(packageDir, sha1 + ".tar.gz"))
+  println("Finished packaging!")
 	if err != nil {
 		panic(err)
 	}
-	defer cmd.Stdout.Close()
+
+/*
 	r := bufio.NewReader(cmd.Stdout)
 	for {
 		line, err := r.ReadBytes('\n')
@@ -95,6 +86,7 @@ func build(project string, sha1 string, builder chan<- interface{}) {
 			panic(err)
 		}
 	}
+*/
 }
 
 func buildExec(dir string, argv []string, builder chan <- interface{}) bool {

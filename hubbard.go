@@ -137,6 +137,8 @@ func Run() {
 		switch os.Args[1] {
 		case "resolve":
 			cmdResolve()
+    case "retrieve":
+      cmdRetrieve()
 		}
 		os.Exit(1)
 	}

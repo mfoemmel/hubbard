@@ -13,6 +13,8 @@ GOFILES=\
 	project.go\
 	repo.go\
 	resolve.go\
+	retrieve.go\
+    tar.go\
 
 hub: hub.$(O)
 	$(LD) -L _obj -o hub hub.$(O)
