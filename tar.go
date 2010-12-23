@@ -90,8 +90,6 @@ func createTarHeader(basedir string, path string) (*tar.Header, os.Error) {
   header.Ctime = info.Ctime_ns / (1000 * 1000 * 1000)
   header.Mtime = info.Mtime_ns / (1000 * 1000 * 1000)
   header.Atime = info.Atime_ns / (1000 * 1000 * 1000)
-  header.Uid = info.Uid
-  header.Gid = info.Gid
   return header, nil
 }
 
