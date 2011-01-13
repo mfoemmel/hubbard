@@ -29,6 +29,52 @@ func archive(path string, target string) os.Error {
   return nil
 }
 
+// Unpacks tarball into the current directory.
+func unarchive(tarball io.Reader) os.Error {
+  gunzip, err := gzip.NewReader(tarball)
+  if err != nil {
+    return err
+  }
+  tr := tar.NewReader(gunzip)
+  for {
+    header, err := tr.Next()
+    if err == os.EOF {
+      // end of tar archive
+      break
+    } else if err != nil {
+      return err
+    } else if header == nil {
+      // end of tar archive
+      break
+    }
+
+    mode := uint32(header.Mode)
+
+    // What are we unpacking? A file or a directory?
+    // TODO: Handle hard links and symlinks.
+    // Directory
+    if header.Typeflag == '5' {
+      err = os.MkdirAll(header.Name, mode)
+      if err != nil {
+        return err
+      }
+    }
+    // File
+    // '0' or ASCII NULL
+    if header.Typeflag == '0' || header.Typeflag == 0 {
+      dst, err := os.Open(header.Name, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, mode)
+      if err != nil {
+        return err
+      }
+      _, err = io.Copy(dst, tr)
+      if err != nil {
+        return err
+      }
+    }
+  }
+  return nil
+}
+
 func copyToArchive(basedir string, path string, archive *tar.Writer) os.Error {
 	if !fileExists(basedir + path) {
 		return os.NewError("file not found")
