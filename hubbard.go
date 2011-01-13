@@ -34,7 +34,7 @@ func projectSummary(w http.ResponseWriter, req *http.Request, projectName string
 		{
 			out.td()
 			{
-				out.raw(`<form action="?sha1=` + c. sha1 + `" method="post"><input type="submit" value="build"/></form>`)
+				out.raw(`<form action="?sha1=` + c.sha1 + `" method="post"><input type="submit" value="build"/></form>`)
 			}
 			out.end()
 
@@ -43,14 +43,14 @@ func projectSummary(w http.ResponseWriter, req *http.Request, projectName string
 			out.td().text(c.author).end()
 			out.td().text(strings.Join(c.tags, ",")).end()
 			out.td().text(c.timestamp).end()
-			
+
 			pkg := "/packages/" + projectName + "/" + c.sha1 + ".tar.gz"
 			if exists("data" + pkg) {
 				w.Write([]byte(`<td><a href="` + pkg + `">download</a></td>`))
 			} else {
 				out.td().end()
 			}
-			
+
 			if exists(project.getLogFile(c.sha1)) {
 				w.Write([]byte(`<td><a href="` + "/logs/" + projectName + "/" + c.sha1 + ".log" + `">log</a></td>`))
 			} else {
@@ -86,7 +86,7 @@ func revisionSummary(w http.ResponseWriter, req *http.Request, projectName strin
 	}
 	out.pre(info)
 }
- 
+
 func projectHandler(w http.ResponseWriter, req *http.Request) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -137,8 +137,8 @@ func Run() {
 		switch os.Args[1] {
 		case "resolve":
 			cmdResolve()
-    case "retrieve":
-      cmdRetrieve()
+		case "retrieve":
+			cmdRetrieve()
 		}
 		os.Exit(1)
 	}

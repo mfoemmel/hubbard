@@ -23,7 +23,7 @@ func (self *hgRepo) log() <-chan *commit {
 	c := make(chan *commit, 100)
 	go func() {
 		defer close(c)
-		argv := []string { hg, "log", "--template", `{date|isodate}\t{node}\t{author}\t{tags}\t{desc|firstline}\n`, "-b", "default"} 
+		argv := []string{hg, "log", "--template", `{date|isodate}\t{node}\t{author}\t{tags}\t{desc|firstline}\n`, "-b", "default"}
 		cmd, err := exec.Run(hg, argv, nil, self.dir, exec.DevNull, exec.Pipe, exec.PassThrough)
 		if err != nil {
 			panic(err)
@@ -34,7 +34,7 @@ func (self *hgRepo) log() <-chan *commit {
 			if line != "" {
 				fields := strings.Split(string(line), "\t", -1)
 				tags := strings.Split(fields[3], " ", -1)
-				c <- &commit{fields[0], fields[1], fields[2], fields[4], tags}		
+				c <- &commit{fields[0], fields[1], fields[2], fields[4], tags}
 			}
 			if err == os.EOF {
 				break
@@ -55,7 +55,7 @@ func (self *hgRepo) log() <-chan *commit {
 }
 
 func (self *hgRepo) logComment(sha1 string) (string, bool) {
-	return capture(self.dir, []string{ "hg", "log", "--template", `{desc}`, "--rev", sha1})
+	return capture(self.dir, []string{"hg", "log", "--template", `{desc}`, "--rev", sha1})
 }
 
 func (self *hgRepo) readFile(sha1 string, filename string) (string, bool) {
@@ -63,16 +63,16 @@ func (self *hgRepo) readFile(sha1 string, filename string) (string, bool) {
 }
 
 func (self *hgRepo) update(sha1 string) {
-	run(os.Stdout, nil, self.dir, []string { findExe("hg"), "update", "-C", sha1 })
+	run(os.Stdout, nil, self.dir, []string{findExe("hg"), "update", "-C", sha1})
 }
 
 func (self *hgRepo) resolve(ref string) (sha1 string) {
-	branches, err := captureLines(self.dir, []string{ "hg", "branches", "--debug" })
+	branches, err := captureLines(self.dir, []string{"hg", "branches", "--debug"})
 	if err != nil {
 		panic(err)
 	}
 
-	tags, err := captureLines(self.dir, []string{ "hg", "tags", "--debug" })
+	tags, err := captureLines(self.dir, []string{"hg", "tags", "--debug"})
 	if err != nil {
 		panic(err)
 	}

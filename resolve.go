@@ -25,7 +25,7 @@ func resolveHandler(w http.ResponseWriter, req *http.Request) {
 	projectName := getParameter(req, "project")
 	ref := getParameter(req, "ref")
 	repo := findRepo(path.Join("data", "repos", projectName))
-	io.WriteString(w, repo.resolve(ref) + "\n")
+	io.WriteString(w, repo.resolve(ref)+"\n")
 }
 
 // Client side logic for retrieving SHA1s  
@@ -78,7 +78,7 @@ func cmdResolve() {
 }
 
 func resolve(project string, ref string) (string, os.Error) {
-// URLUnescape?
+	// URLUnescape?
 	project = http.URLEscape(project)
 	ref = http.URLEscape(ref)
 	resp, _, err := http.Get("http://localhost:4788/resolve?project=" + project + "&ref=" + ref)

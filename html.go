@@ -21,7 +21,7 @@ func (self *htmlWriter) raw(html string) *htmlWriter {
 
 func (self *htmlWriter) start(name string) *htmlWriter {
 	self.checkFirst()
-	io.WriteString(self.w, `<` + name)
+	io.WriteString(self.w, `<`+name)
 	self.push(name)
 	self.first = true
 	return self
@@ -31,7 +31,7 @@ func (self *htmlWriter) with(name string, value string) *htmlWriter {
 	if !self.first {
 		panic("attributes aren't valid here")
 	}
-	io.WriteString(self.w, ` ` + name + `="` + html.EscapeString(value) + `"` )
+	io.WriteString(self.w, ` `+name+`="`+html.EscapeString(value)+`"`)
 	return self
 }
 
@@ -59,13 +59,13 @@ func (self *htmlWriter) text(text string) *htmlWriter {
 
 func (self *htmlWriter) pre(text string) *htmlWriter {
 	self.checkFirst()
-	io.WriteString(self.w, "<pre>" + html.EscapeString(text) + "</pre>")
+	io.WriteString(self.w, "<pre>"+html.EscapeString(text)+"</pre>")
 	return self
 }
 
 func (self *htmlWriter) end() *htmlWriter {
 	self.checkFirst()
-	io.WriteString(self.w, `</` + self.pop() + `>`)
+	io.WriteString(self.w, `</`+self.pop()+`>`)
 	return self
 }
 
@@ -87,4 +87,3 @@ func (self *htmlWriter) pop() string {
 	self.closeTags = self.closeTags[0:pos]
 	return closeTag
 }
-

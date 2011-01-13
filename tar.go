@@ -6,10 +6,10 @@ import "io"
 import "os"
 
 func archive(path string, target string) os.Error {
-	out, err := os.Open(target, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, 0666)
-  if err != nil {
-    panic(err)
-  }
+	out, err := os.Open(target, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
+	if err != nil {
+		panic(err)
+	}
 	zout, err := gzip.NewWriter(out)
 	if err != nil {
 		panic(err)
@@ -22,54 +22,54 @@ func archive(path string, target string) os.Error {
 	}
 	defer archive.Close()
 
-  err = copyToArchive(path, "", archive)
-  if err != nil {
-    return err
-  }
-  return nil
+	err = copyToArchive(path, "", archive)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // Unpacks tarball into the current directory.
 func unarchive(tarball io.Reader) os.Error {
-  gunzip, err := gzip.NewReader(tarball)
-  if err != nil {
-    return err
-  }
-  tr := tar.NewReader(gunzip)
-  for {
-    header, err := tr.Next()
-    if err == os.EOF {
-      // end of tar archive
-      break
-    } else if err != nil {
-      return err
-    } else if header == nil {
-      // end of tar archive
-      break
-    }
+	gunzip, err := gzip.NewReader(tarball)
+	if err != nil {
+		return err
+	}
+	tr := tar.NewReader(gunzip)
+	for {
+		header, err := tr.Next()
+		if err == os.EOF {
+			// end of tar archive
+			break
+		} else if err != nil {
+			return err
+		} else if header == nil {
+			// end of tar archive
+			break
+		}
 
-    mode := uint32(header.Mode)
+		mode := uint32(header.Mode)
 
-    // What are we unpacking? A file or a directory?
-    // TODO: Handle hard links and symlinks.
-    switch header.Typeflag {
-      case '5':  // Directory
-        err = os.MkdirAll(header.Name, mode)
-        if err != nil {
-          return err
-        }
-      case '0', 0:  // File. '0' or ASCII NULL
-        dst, err := os.Open(header.Name, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, mode)
-        if err != nil {
-          return err
-        }
-        _, err = io.Copy(dst, tr)
-        if err != nil {
-          return err
-        }
-    }
-  }
-  return nil
+		// What are we unpacking? A file or a directory?
+		// TODO: Handle hard links and symlinks.
+		switch header.Typeflag {
+		case '5': // Directory
+			err = os.MkdirAll(header.Name, mode)
+			if err != nil {
+				return err
+			}
+		case '0', 0: // File. '0' or ASCII NULL
+			dst, err := os.Open(header.Name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode)
+			if err != nil {
+				return err
+			}
+			_, err = io.Copy(dst, tr)
+			if err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func copyToArchive(basedir string, path string, archive *tar.Writer) os.Error {
@@ -96,10 +96,10 @@ func copyToArchive(basedir string, path string, archive *tar.Writer) os.Error {
 			panic(err)
 		}
 		for _, child := range children {
-      if child == ".hg" || child == ".git" || child == ".svn" {
-        continue
-      }
-			copyToArchive(basedir, path + "/" + child, archive)
+			if child == ".hg" || child == ".git" || child == ".svn" {
+				continue
+			}
+			copyToArchive(basedir, path+"/"+child, archive)
 		}
 	} else {
 		sourceFile, err := openReader(basedir + "/" + path)
@@ -107,10 +107,10 @@ func copyToArchive(basedir string, path string, archive *tar.Writer) os.Error {
 			panic(err)
 		}
 
-    header, err := createTarHeader(basedir, path)
-    if err != nil {
-      panic(err)
-    }
+		header, err := createTarHeader(basedir, path)
+		if err != nil {
+			panic(err)
+		}
 		err = archive.WriteHeader(header)
 		if err != nil {
 			panic(err)
@@ -118,22 +118,22 @@ func copyToArchive(basedir string, path string, archive *tar.Writer) os.Error {
 
 		io.Copy(archive, sourceFile)
 	}
-  return nil
+	return nil
 }
 
 func createTarHeader(basedir string, path string) (*tar.Header, os.Error) {
-  info, err := os.Stat(basedir + "/" + path)
-  if err != nil {
-    return nil, err
-  }
-  header := new(tar.Header)
-  header.Name = path[1:]
-  header.Size = info.Size
-  header.Mode = int64(info.Mode)
-  header.Ctime = info.Ctime_ns / (1000 * 1000 * 1000)
-  header.Mtime = info.Mtime_ns / (1000 * 1000 * 1000)
-  header.Atime = info.Atime_ns / (1000 * 1000 * 1000)
-  return header, nil
+	info, err := os.Stat(basedir + "/" + path)
+	if err != nil {
+		return nil, err
+	}
+	header := new(tar.Header)
+	header.Name = path[1:]
+	header.Size = info.Size
+	header.Mode = int64(info.Mode)
+	header.Ctime = info.Ctime_ns / (1000 * 1000 * 1000)
+	header.Mtime = info.Mtime_ns / (1000 * 1000 * 1000)
+	header.Atime = info.Atime_ns / (1000 * 1000 * 1000)
+	return header, nil
 }
 
 func fileExists(path string) bool {

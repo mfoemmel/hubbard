@@ -13,7 +13,7 @@ type commit struct {
 type repo interface {
 	log() <-chan *commit
 	logComment(sha1 string) (string, bool)
-	readFile(sha1 string, filename string) (string,bool)
+	readFile(sha1 string, filename string) (string, bool)
 	update(sha1 string)
 	resolve(ref string) (sha1 string)
 }

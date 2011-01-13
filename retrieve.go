@@ -23,10 +23,10 @@ func cmdRetrieve() {
 		if strings.HasPrefix(line, "[") {
 			inVersions = line == "[versions]"
 		} else if inVersions {
-      components := strings.Split(line, "=", 2)
+			components := strings.Split(line, "=", 2)
 			fields := strings.Split(components[0], "/", 2)
 			project := fields[0]
-      sha1 := components[1]
+			sha1 := components[1]
 			err := retrieve(project, sha1)
 			if err != nil {
 				panic(err)
@@ -36,24 +36,24 @@ func cmdRetrieve() {
 }
 
 func retrieve(project string, sha1 string) os.Error {
-  url := "http://localhost:4788/packages/" + project + "/" + sha1 + ".tar.gz"
-  println("Retrieving package: ", url)
-  resp, _, err := http.Get(url)
+	url := "http://localhost:4788/packages/" + project + "/" + sha1 + ".tar.gz"
+	println("Retrieving package: ", url)
+	resp, _, err := http.Get(url)
 	if err != nil {
 		return err
 	}
 	if resp.StatusCode != 200 {
-    body, err := ioutil.ReadAll(resp.Body)
-    if err != nil {
-      return err
-    }
+		body, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
 		panic(strings.TrimSpace(string(body)))
 	}
 
-  err = unarchive(resp.Body)
-  if err != nil {
-    return err
-  }
+	err = unarchive(resp.Body)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

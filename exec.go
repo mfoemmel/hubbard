@@ -27,7 +27,7 @@ func captureLines(dir string, argv []string) ([]string, os.Error) {
 
 	pipeIn, pipeOut := pipe()
 
-	pid, err := os.ForkExec(argv[0], argv, os.Environ(), dir, []*os.File{ os.Stdin, pipeOut, os.Stderr })
+	pid, err := os.ForkExec(argv[0], argv, os.Environ(), dir, []*os.File{os.Stdin, pipeOut, os.Stderr})
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func run(w io.Writer, env []string, dir string, argv []string) bool {
 
 	fmt.Printf("%s -- %v\n", dir, argv)
 
-	pid, err := os.ForkExec(argv[0], argv, os.Environ(), dir, []*os.File{ os.Stdin, pipeOut, os.Stderr })
+	pid, err := os.ForkExec(argv[0], argv, os.Environ(), dir, []*os.File{os.Stdin, pipeOut, os.Stderr})
 	if err != nil {
 		panic(err)
 	}
@@ -81,13 +81,13 @@ func run(w io.Writer, env []string, dir string, argv []string) bool {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	msg, err := os.Wait(pid, 0)
 	if err != nil {
 		panic(err)
 	}
 
-	return msg.WaitStatus == 0 
+	return msg.WaitStatus == 0
 }
 
 func pipe() (*os.File, *os.File) {
@@ -95,12 +95,12 @@ func pipe() (*os.File, *os.File) {
 	if err != nil {
 		panic(err)
 	}
-	return r,w
+	return r, w
 }
 
 func findExe(exe string) string {
 	for _, dir := range strings.Split(os.Getenv("PATH"), ":", -1) {
-		file := path.Join(dir,exe)
+		file := path.Join(dir, exe)
 		if exists(file) {
 			return file
 		}
@@ -118,4 +118,3 @@ func exists(filename string) bool {
 	}
 	panic(err)
 }
-

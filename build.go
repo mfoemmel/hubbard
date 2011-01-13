@@ -4,8 +4,7 @@ import "bufio"
 import "os"
 import "path"
 
-type buildCmd struct {
-}
+type buildCmd struct{}
 
 type viewCmd struct {
 	out chan<- []byte
@@ -44,7 +43,7 @@ func build(project string, sha1 string, builder chan<- interface{}) {
 		panic(err)
 	}
 	dir := cwd + "/data/working/" + project
-	
+
 	logDir := path.Join(cwd, "data", "build", project)
 	err = os.MkdirAll(logDir, 0777)
 	if err != nil {
@@ -64,35 +63,35 @@ func build(project string, sha1 string, builder chan<- interface{}) {
 		panic(err)
 	}
 
-  println("packaging " + dir + " as " + path.Join(packageDir, sha1 + ".tar.gz"))
-  err = archive(dir, path.Join(packageDir, sha1 + ".tar.gz"))
-  println("Finished packaging!")
+	println("packaging " + dir + " as " + path.Join(packageDir, sha1+".tar.gz"))
+	err = archive(dir, path.Join(packageDir, sha1+".tar.gz"))
+	println("Finished packaging!")
 	if err != nil {
 		panic(err)
 	}
 
-/*
-	r := bufio.NewReader(cmd.Stdout)
-	for {
-		line, err := r.ReadBytes('\n')
-		if len(line) != 0 {
-			os.Stdout.Write(line)
-			log.Write(line)
+	/*
+		r := bufio.NewReader(cmd.Stdout)
+		for {
+			line, err := r.ReadBytes('\n')
+			if len(line) != 0 {
+				os.Stdout.Write(line)
+				log.Write(line)
+			}
+			if err == os.EOF {
+				break
+			}
+			if err != nil {
+				panic(err)
+			}
 		}
-		if err == os.EOF {
-			break
-		}
-		if err != nil {
-			panic(err)
-		}
-	}
-*/
+	*/
 }
 
-func buildExec(dir string, argv []string, builder chan <- interface{}) bool {
+func buildExec(dir string, argv []string, builder chan<- interface{}) bool {
 	pipeIn, pipeOut := pipe()
 
-	pid, err := os.ForkExec(argv[0], argv, os.Environ(), dir, []*os.File{ os.Stdin, pipeOut, pipeOut })
+	pid, err := os.ForkExec(argv[0], argv, os.Environ(), dir, []*os.File{os.Stdin, pipeOut, pipeOut})
 	if err != nil {
 		panic(err)
 	}
@@ -115,5 +114,5 @@ func buildExec(dir string, argv []string, builder chan <- interface{}) bool {
 		panic(err)
 	}
 
-	return msg.WaitStatus == 0 
+	return msg.WaitStatus == 0
 }

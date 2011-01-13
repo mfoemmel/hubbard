@@ -13,7 +13,7 @@ func (self *gitRepo) log() <-chan *commit {
 	c := make(chan *commit, 100)
 	pipeIn, pipeOut := io.Pipe()
 	go func() {
-		argv := []string{ findExe("git"), "log", `--format=%ci|%H|%an|%d|%s`}
+		argv := []string{findExe("git"), "log", `--format=%ci|%H|%an|%d|%s`}
 		run(pipeOut, nil, self.dir, argv)
 		pipeOut.Close()
 	}()
@@ -28,7 +28,7 @@ func (self *gitRepo) log() <-chan *commit {
 			if err != nil {
 				panic(err)
 			}
-			
+
 			fields := strings.Split(string(line), "|", -1)
 			tags := []string{}
 			// EXAMPLE
@@ -45,15 +45,15 @@ func (self *gitRepo) log() <-chan *commit {
 }
 
 func (self *gitRepo) logComment(sha1 string) (string, bool) {
-	return capture(self.dir, []string{ "git", "show", "-s", `--format=%B`, sha1})
+	return capture(self.dir, []string{"git", "show", "-s", `--format=%B`, sha1})
 }
 
 func (self *gitRepo) readFile(sha1 string, filename string) (string, bool) {
-	return capture(self.dir, []string{ "git", "show", sha1 + ":" + filename})
+	return capture(self.dir, []string{"git", "show", sha1 + ":" + filename})
 }
 
 func (self *gitRepo) update(sha1 string) {
-	run(os.Stdout, nil, self.dir, []string { findExe("git"), "checkout", sha1 })
+	run(os.Stdout, nil, self.dir, []string{findExe("git"), "checkout", sha1})
 }
 
 func (self *gitRepo) resolve(ref string) (sha1 string) {

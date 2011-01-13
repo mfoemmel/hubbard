@@ -7,6 +7,6 @@ type project struct {
 }
 
 func (self *project) getLogFile(sha1 string) string {
-	return path.Join("data", "build", self.name, sha1 + ".log")
+	return path.Join("data", "build", self.name, sha1+".log")
 
 }
