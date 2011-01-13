@@ -52,24 +52,21 @@ func unarchive(tarball io.Reader) os.Error {
 
     // What are we unpacking? A file or a directory?
     // TODO: Handle hard links and symlinks.
-    // Directory
-    if header.Typeflag == '5' {
-      err = os.MkdirAll(header.Name, mode)
-      if err != nil {
-        return err
-      }
-    }
-    // File
-    // '0' or ASCII NULL
-    if header.Typeflag == '0' || header.Typeflag == 0 {
-      dst, err := os.Open(header.Name, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, mode)
-      if err != nil {
-        return err
-      }
-      _, err = io.Copy(dst, tr)
-      if err != nil {
-        return err
-      }
+    switch header.Typeflag {
+      case '5':  // Directory
+        err = os.MkdirAll(header.Name, mode)
+        if err != nil {
+          return err
+        }
+      case '0', 0:  // File. '0' or ASCII NULL
+        dst, err := os.Open(header.Name, os.O_WRONLY | os.O_CREATE | os.O_TRUNC, mode)
+        if err != nil {
+          return err
+        }
+        _, err = io.Copy(dst, tr)
+        if err != nil {
+          return err
+        }
     }
   }
   return nil
