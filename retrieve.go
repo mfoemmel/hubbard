@@ -3,6 +3,7 @@ package hubbard
 import "archive/tar"
 import "compress/gzip"
 import "http"
+import "io"
 import "io/ioutil"
 import "os"
 import "strings"
@@ -38,7 +39,9 @@ func cmdRetrieve() {
 }
 
 func retrieve(project string, sha1 string) os.Error {
-  resp, _, err := http.Get("http://localhost:4788/packages/" + project + "/" + sha1 + ".tar.gz")
+  url := "http://localhost:4788/packages/" + project + "/" + sha1 + ".tar.gz"
+  println("Retrieving package: ", url)
+  resp, _, err := http.Get(url)
 	if err != nil {
 		return err
 	}
@@ -53,22 +56,41 @@ func retrieve(project string, sha1 string) os.Error {
   if err != nil {
     return err
   }
-  tarrer := tar.NewReader(gunzip)
+  tr := tar.NewReader(gunzip)
   for {
-    buf := make([]byte, 1024)
-    for {
-      count, err := tarrer.Read(buf)
-      if err == os.EOF && count == 0 {
-        break
-      } else if err != nil {
+    header, err := tr.Next()
+    if err == os.EOF {
+      // end of tar archive
+      break
+    } else if err != nil {
+      return err
+    } else if header == nil {
+      // end of tar archive
+      break
+    }
+
+    mode := uint32(header.Mode)
+
+    // What are we unpacking? A file or a directory?
+    // TODO: Handle hard links and symlinks.
+    // Directory
+    if header.Typeflag == '5' {
+      err = os.MkdirAll(header.Name, mode)
+      if err != nil {
         return err
       }
     }
-    header, err := tarrer.Next()
-    if err != nil {
-      return err
-    } else if header == nil {
-      break
+    // File
+    // '0' or ASCII NULL
+    if header.Typeflag == '0' || header.Typeflag == 0 {
+      dst, err := os.Open(header.Name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode)
+      if err != nil {
+        return err
+      }
+      _, err = io.Copy(dst, tr)
+      if err != nil {
+        return err
+      }
     }
   }
 	return nil
