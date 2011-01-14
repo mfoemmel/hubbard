@@ -3,6 +3,7 @@ package hubbard
 import "bufio"
 import "os"
 import "path"
+import "strings"
 
 type buildCmd struct{}
 
@@ -25,7 +26,6 @@ func newBuilder(project string, sha1 string) chan<- interface{} {
 					build(project, sha1, c)
 				}()
 			case viewCmd:
-				println("here")
 				viewers = append(viewers, cmd.out)
 			case logCmd:
 				for _, viewer := range viewers {
@@ -55,7 +55,44 @@ func build(project string, sha1 string, builder chan<- interface{}) {
 	//	panic(err)
 	//}
 
+	// Update to the given rev for the project.
 	findRepo(dir).update(sha1)
+
+	// Only retrieve dependencies or build the project if there's
+	// actually a 'package.hub' file in the project.
+	if exists(dir + "/" + "package.hub") {
+		println("DEBUG *** Build processing package.hub file.")
+		// Move into the project directory.
+		err = os.Chdir(dir)
+		if err != nil {
+			panic(err)
+		}
+
+		// Retrieve any project dependencies.
+		println("DEBUG *** Build running srvRetrieve() for ", project, sha1)
+		srvRetrieve()
+
+		// Parse the [build] section of the package.hub file.
+		println("DEBUG *** Build parsing package.hub ...")
+		workDir, buildCmd := parseBuild()
+		if err != nil {
+			panic(err)
+		}
+		println("DEBUG *** Building project: ", project)
+		println("DEBUG *** Build WorkDir: ", workDir)
+		println("DEBUG *** Build Cmd: ", buildCmd)
+		// Build the project.
+		success := buildExec(workDir, buildCmd, builder)
+		// TODO: Don't panic the server if a build fails.
+		if success != true {
+			panic("Build command failed!")
+		}
+		// Move back to the old CWD.
+		err = os.Chdir(cwd)
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	packageDir := path.Join(cwd, "data", "packages", project)
 	err = os.MkdirAll(packageDir, 0777)
@@ -115,4 +152,41 @@ func buildExec(dir string, argv []string, builder chan<- interface{}) bool {
 	}
 
 	return msg.WaitStatus == 0
+}
+
+func parseBuild() (workDir string, buildCmd []string) {
+	cwd, _ := os.Getwd()
+	println("DEBUG *** parseBuild in CWD: ", cwd)
+	// Defaults for building a project.
+	workDir = "."
+	buildCmd = []string{"make", "test"}
+
+	lines, err := readFileLines("package.hub")
+	if err != nil {
+		panic(err)
+	}
+
+	// Flag to indicate whether we're in the [build] section or not
+	inBuild := false
+
+	// Loop through lines in package.hub
+	for _, line := range lines {
+		line = strings.TrimSpace(line)
+		if line == "" {
+			continue
+		}
+		if strings.HasPrefix(line, "[") {
+			inBuild = line == "[build]"
+		} else if inBuild {
+			components := strings.Split(line, "=", 2)
+			switch components[0] {
+			case "workdir":
+				workDir = components[1]
+			case "command":
+				// TODO: How many command args should we support?  More than 10?
+				buildCmd = strings.Split(components[1], " ", 10)
+			}
+		}
+	}
+	return workDir, buildCmd
 }

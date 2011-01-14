@@ -140,7 +140,7 @@ func Run() {
 		case "retrieve":
 			cmdRetrieve()
 		}
-		os.Exit(1)
+		os.Exit(0)
 	}
 	http.HandleFunc("/", projectHandler)
 	http.HandleFunc("/resolve", resolveHandler)
