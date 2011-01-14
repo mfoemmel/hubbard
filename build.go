@@ -42,10 +42,10 @@ func build(project string, sha1 string, builder chan<- interface{}) {
 	if err != nil {
 		panic(err)
 	}
-	dir := cwd + "/data/working/" + project
+	dir := path.Join(getReposDir(), project)
 
-	logDir := path.Join(cwd, "data", "build", project)
-	err = os.MkdirAll(logDir, 0777)
+	logDir := path.Join(getLogDir(), project)
+	err = os.MkdirAll(logDir, 0755)
 	if err != nil {
 		panic(err)
 	}
@@ -60,25 +60,24 @@ func build(project string, sha1 string, builder chan<- interface{}) {
 
 	// Only retrieve dependencies or build the project if there's
 	// actually a 'package.hub' file in the project.
-	if exists(dir + "/" + "package.hub") {
-		println("DEBUG *** Build processing package.hub file.")
-		// Move into the project directory.
-		err = os.Chdir(dir)
-		if err != nil {
-			panic(err)
-		}
+	hubFile := path.Join(dir, "package.hub")
+	if exists(hubFile) {
+		println("DEBUG *** Build processing hubFile: ", hubFile)
 
 		// Retrieve any project dependencies.
 		println("DEBUG *** Build running srvRetrieve() for ", project, sha1)
-		srvRetrieve()
+		srvRetrieve(dir)
 
 		// Parse the [build] section of the package.hub file.
 		println("DEBUG *** Build parsing package.hub ...")
-		workDir, buildCmd := parseBuild()
+		workDir, buildCmd := parseBuild(hubFile)
 		if err != nil {
 			panic(err)
 		}
+		baseDir := getBaseDir(hubFile)
+		workDir = path.Join(baseDir, workDir)
 		println("DEBUG *** Building project: ", project)
+		println("DEBUG *** Build BaseDir: ", baseDir)
 		println("DEBUG *** Build WorkDir: ", workDir)
 		println("DEBUG *** Build Cmd: ", buildCmd)
 		// Build the project.
@@ -86,11 +85,6 @@ func build(project string, sha1 string, builder chan<- interface{}) {
 		// TODO: Don't panic the server if a build fails.
 		if success != true {
 			panic("Build command failed!")
-		}
-		// Move back to the old CWD.
-		err = os.Chdir(cwd)
-		if err != nil {
-			panic(err)
 		}
 	}
 
@@ -154,14 +148,15 @@ func buildExec(dir string, argv []string, builder chan<- interface{}) bool {
 	return msg.WaitStatus == 0
 }
 
-func parseBuild() (workDir string, buildCmd []string) {
-	cwd, _ := os.Getwd()
-	println("DEBUG *** parseBuild in CWD: ", cwd)
+// Parses the [build] section for a given hubFile. (usually 'package.hub')
+// hubFile is a path to the file.
+func parseBuild(hubFile string) (workDir string, buildCmd []string) {
+	println("DEBUG *** parseBuild processing: ", hubFile)
 	// Defaults for building a project.
 	workDir = "."
 	buildCmd = []string{"make", "test"}
 
-	lines, err := readFileLines("package.hub")
+	lines, err := readFileLines(hubFile)
 	if err != nil {
 		panic(err)
 	}
@@ -189,4 +184,10 @@ func parseBuild() (workDir string, buildCmd []string) {
 		}
 	}
 	return workDir, buildCmd
+}
+
+// A project's base directory is the directory containing the 'package.hub' file.
+func getBaseDir(hubFile string) string {
+	baseDir, hubFile := path.Split(hubFile)
+	return baseDir
 }

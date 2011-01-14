@@ -6,8 +6,31 @@ import "strings"
 import "os"
 import "path"
 
+
+func getDataDir() string {
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	dataDir := path.Join(cwd, "data")
+	return dataDir
+}
+
+func getLogDir() string {
+	return path.Join(getDataDir(), "build", "logs")
+}
+
+func getPackageDir() string {
+	return path.Join(getDataDir(), "packages")
+}
+
+func getReposDir() string {
+	return path.Join(getDataDir(), "repos")
+}
+
+// HttpHandler
 func projectList(w http.ResponseWriter, req *http.Request) {
-	fd, err := os.Open("data/repos", os.O_RDONLY, 0)
+	fd, err := os.Open(getReposDir(), os.O_RDONLY, 0)
 	if err != nil {
 		panic(err)
 	}
@@ -142,10 +165,11 @@ func Run() {
 		}
 		os.Exit(0)
 	}
+
 	http.HandleFunc("/", projectHandler)
 	http.HandleFunc("/resolve", resolveHandler)
-	http.Handle("/packages/", http.FileServer("data/packages", "/packages/"))
-	http.Handle("/logs/", http.FileServer("data/build", "/logs/"))
+	http.Handle("/packages/", http.FileServer(getPackageDir(), "/packages/"))
+	http.Handle("/logs/", http.FileServer(getLogDir(), "/logs/"))
 	log.Println("Listening on port 4788")
 	err := http.ListenAndServe(":4788", nil)
 	if err != nil {

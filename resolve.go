@@ -10,6 +10,7 @@ import "os"
 import "path"
 import "strings"
 
+// HttpHandler
 // This handler returns the SHA1 associated with a particular tag or branch name for a project
 func resolveHandler(w http.ResponseWriter, req *http.Request) {
 	defer func() {
@@ -24,7 +25,7 @@ func resolveHandler(w http.ResponseWriter, req *http.Request) {
 	req.ParseForm()
 	projectName := getParameter(req, "project")
 	ref := getParameter(req, "ref")
-	repo := findRepo(path.Join("data", "repos", projectName))
+	repo := findRepo(path.Join(getReposDir(), projectName))
 	io.WriteString(w, repo.resolve(ref)+"\n")
 }
 

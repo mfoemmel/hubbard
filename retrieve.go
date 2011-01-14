@@ -4,6 +4,7 @@ import "fmt"
 import "http"
 import "io/ioutil"
 import "os"
+import "path"
 import "strings"
 
 func cmdRetrieve() {
@@ -18,7 +19,7 @@ func cmdRetrieve() {
 	// Only perform a retrieve if there is a 'package.hub' file.
 	if exists("package.hub") {
 		println("DEBUG *** cmdRetrieve found package.hub file.")
-		project, sha1 := parseVersions()
+		project, sha1 := parseVersions("package.hub")
 		if project != "" && sha1 != "" {
 			println("DEBUG *** cmdRetrieve() calling retrieve() for ", project, sha1)
 			retrieve(project, sha1)
@@ -26,10 +27,10 @@ func cmdRetrieve() {
 	}
 }
 
-// Retrieve packages for builds on the server.
+// Retrieve packages for builds on the server into destination path.
 // Don't do anything if there's not a 'package.hub' file, or
 // no [versions] section in 'package.hub'
-func srvRetrieve() {
+func srvRetrieve(dst string) {
 	defer func() {
 		if r := recover(); r != nil {
 			fmt.Fprintf(os.Stderr, "ERROR: %v\n", r)
@@ -38,22 +39,23 @@ func srvRetrieve() {
 
 	println("DEBUG *** In srvRetrieve() ...")
 	// Only perform a retrieve if there is a 'package.hub' file.
-	if exists("package.hub") {
+	hubFile := path.Join(dst, "package.hub")
+	if exists(hubFile) {
 		println("DEBUG *** srvRetrieve found package.hub file.")
-		project, sha1 := parseVersions()
+		project, sha1 := parseVersions(hubFile)
 		if project != "" && sha1 != "" {
 			println("DEBUG *** srvRetrieve() calling retrieve() for ", project, sha1)
 			// Assuming we're already in the correct directory.
 			// Was getting a 'File not found' error when downloading via http.Get().
 			// So just copy files on the filesystem, instead.
-			archiveFile := "/home/jramnani/work/hubbard/data/packages/" + project + "/" + sha1 + ".tar.gz"
+			archiveFile := path.Join(getPackageDir(), project, sha1) + ".tar.gz"
 			println("DEBUG *** srvRetrieve() unarchiving: ", archiveFile)
 			println("Retrieving package: ", archiveFile)
 			af, err := os.Open(archiveFile, os.O_RDONLY, 0644)
 			if err != nil {
 				panic(err)
 			}
-			unarchive(af)
+			unarchive(dst, af)
 		}
 	}
 }
@@ -74,16 +76,17 @@ func retrieve(project string, sha1 string) os.Error {
 		panic(strings.TrimSpace(string(body)))
 	}
 
-	err = unarchive(resp.Body)
+	err = unarchive(".", resp.Body)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// Parse the [versions] section of 'package.hub'
-func parseVersions() (project, sha1 string) {
-	lines, err := readFileLines("package.hub")
+// Parse the [versions] section of hubFile (usually 'package.hub').
+// hubFile is a path to the hubFile.
+func parseVersions(hubFile string) (project, sha1 string) {
+	lines, err := readFileLines(hubFile)
 	if err != nil {
 		panic(err)
 	}
