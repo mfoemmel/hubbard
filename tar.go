@@ -49,7 +49,10 @@ func unarchive(prefix string, tarball io.Reader) os.Error {
 	if err != nil {
 		return err
 	}
+  defer gunzip.Close()
+
 	tr := tar.NewReader(gunzip)
+
 	for {
 		header, err := tr.Next()
 		if err == os.EOF {
@@ -78,6 +81,7 @@ func unarchive(prefix string, tarball io.Reader) os.Error {
 			if err != nil {
 				return err
 			}
+      defer dst.Close()
 			_, err = io.Copy(dst, tr)
 			if err != nil {
 				return err
