@@ -125,6 +125,7 @@ func copyToArchive(basedir string, path string, archive *tar.Writer) os.Error {
 		if err != nil {
 			panic(err)
 		}
+    defer sourceFile.Close()
 
 		header, err := createTarHeader(basedir, path)
 		if err != nil {
