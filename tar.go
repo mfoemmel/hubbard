@@ -170,7 +170,7 @@ func fileExists(path string) bool {
 }
 
 func mkdir(path string) os.Error {
-	return os.Mkdir(path, 0777)
+	return os.Mkdir(path, 0755)
 }
 
 func list(path string) ([]string, os.Error) {
