@@ -28,6 +28,10 @@ func getReposDir() string {
 	return path.Join(getDataDir(), "repos")
 }
 
+func getWorkDir() string {
+	return path.Join(getDataDir(), "working")
+}
+
 // HttpHandler
 func projectList(w http.ResponseWriter, req *http.Request) {
 	fd, err := os.Open(getReposDir(), os.O_RDONLY, 0)

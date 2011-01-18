@@ -42,7 +42,7 @@ func build(project string, sha1 string, builder chan<- interface{}) {
 	if err != nil {
 		panic(err)
 	}
-	dir := path.Join(getReposDir(), project)
+	dir := path.Join(getWorkDir(), project)
 
 	logDir := path.Join(getLogDir(), project)
 	err = os.MkdirAll(logDir, 0755)
