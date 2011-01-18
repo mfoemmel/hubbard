@@ -57,5 +57,33 @@ func (self *gitRepo) update(sha1 string) {
 }
 
 func (self *gitRepo) resolve(ref string) (sha1 string) {
-	panic("not implemented")
+	// refs is a map of "ref -> sha1" where "ref" is a branch or a tag.
+	refs := make(map[string]string)
+	branches, err := captureLines(self.dir, []string{"git", "branch", "--verbose", "--no-abbrev"})
+	if err != nil {
+		panic(err)
+	}
+	for _, line := range(branches) {
+		fields := strings.Split(line, " ", 4)
+		branch := strings.TrimSpace(fields[1])
+		sha1 := strings.TrimSpace(fields[2])
+		refs[branch] = sha1
+	}
+	tags, err := captureLines(self.dir, []string{"git", "tag"})
+	if err != nil {
+		panic(err)
+	}
+	for _, line := range(tags) {
+		tag := strings.TrimSpace(line)
+		sha1, ok := capture(self.dir, []string{"git", "show", "-s", "--format='%H'"}); if !ok {
+			panic("Couldn't get SHA1 for tag: " + tag)
+		}
+		refs[tag] = sha1
+	}
+	// Do we have the requested ref?
+	_, present := refs[ref]
+	if present {
+		return refs[ref]
+	}
+	panic("ref not found: " + ref)
 }
