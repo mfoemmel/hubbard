@@ -49,7 +49,7 @@ func unarchive(prefix string, tarball io.Reader) os.Error {
 	if err != nil {
 		return err
 	}
-  defer gunzip.Close()
+	defer gunzip.Close()
 
 	tr := tar.NewReader(gunzip)
 
@@ -77,16 +77,26 @@ func unarchive(prefix string, tarball io.Reader) os.Error {
 				return err
 			}
 		case '0', 0: // File. '0' or ASCII NULL
-			dst, err := os.Open(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode)
-			if err != nil {
-				return err
-			}
-      defer dst.Close()
-			_, err = io.Copy(dst, tr)
+			err = copyToFile(name, tr, mode)
 			if err != nil {
 				return err
 			}
 		}
+	}
+	return nil
+}
+
+// Copy data from a tar.Reader into a destination file.
+// "name" is a path to the destination file.
+func copyToFile(name string, tr *tar.Reader, mode uint32) os.Error {
+	dst, err := os.Open(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode)
+	if err != nil {
+		return err
+	}
+	defer dst.Close()
+	_, err = io.Copy(dst, tr)
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -125,7 +135,6 @@ func copyToArchive(basedir string, path string, archive *tar.Writer) os.Error {
 		if err != nil {
 			panic(err)
 		}
-    defer sourceFile.Close()
 
 		header, err := createTarHeader(basedir, path)
 		if err != nil {
