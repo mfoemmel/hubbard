@@ -1,4 +1,5 @@
 data/
+deps/
 _obj
 *.6
 hub

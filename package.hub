@@ -2,4 +2,4 @@
 go/master=2bad2dbe72a94061996a2ea7519751adc98050d9
 
 [build]
-command=make
+command=./build.sh
