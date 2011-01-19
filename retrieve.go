@@ -45,19 +45,22 @@ func srvRetrieve(dst string) {
 	if exists(hubFile) {
 		println("DEBUG *** srvRetrieve found package.hub file.")
 		project, sha1 := parseVersions(hubFile)
+		retrieveDir := path.Join(dst, "deps", project)
+		err := mkdir_p(retrieveDir)
+		if err != nil {
+			panic(err)
+		}
 		if project != "" && sha1 != "" {
-			println("DEBUG *** srvRetrieve() calling retrieve() for ", project, sha1)
-			// Assuming we're already in the correct directory.
-			// Was getting a 'File not found' error when downloading via http.Get().
-			// So just copy files on the filesystem, instead.
+			// Unpack the package into retrieveDir.
 			archiveFile := path.Join(getPackageDir(), project, sha1) + ".tar.gz"
 			println("DEBUG *** srvRetrieve() unarchiving: ", archiveFile)
+			println("DEBUG *** into: ", retrieveDir)
 			println("Retrieving package: ", archiveFile)
 			af, err := os.Open(archiveFile, os.O_RDONLY, 0644)
 			if err != nil {
 				panic(err)
 			}
-			unarchive(dst, af)
+			unarchive(retrieveDir, af)
 		}
 	}
 }

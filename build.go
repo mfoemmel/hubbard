@@ -1,6 +1,7 @@
 package hubbard
 
 import "bufio"
+import "fmt"
 import "os"
 import "path"
 import "strings"
@@ -38,14 +39,10 @@ func newBuilder(project string, sha1 string) chan<- interface{} {
 }
 
 func build(project string, sha1 string, builder chan<- interface{}) {
-	cwd, err := os.Getwd()
-	if err != nil {
-		panic(err)
-	}
 	dir := path.Join(getWorkDir(), project)
 
 	logDir := path.Join(getLogDir(), project)
-	err = os.MkdirAll(logDir, 0755)
+	err := os.MkdirAll(logDir, 0755)
 	if err != nil {
 		panic(err)
 	}
@@ -79,7 +76,7 @@ func build(project string, sha1 string, builder chan<- interface{}) {
 		println("DEBUG *** Building project: ", project)
 		println("DEBUG *** Build BaseDir: ", baseDir)
 		println("DEBUG *** Build WorkDir: ", workDir)
-		println("DEBUG *** Build Cmd: ", buildCmd)
+		fmt.Println("DEBUG *** Build Cmd: ", buildCmd)
 		// Build the project.
 		success := buildExec(workDir, buildCmd, builder)
 		// TODO: Don't panic the server if a build fails.
@@ -88,8 +85,8 @@ func build(project string, sha1 string, builder chan<- interface{}) {
 		}
 	}
 
-	packageDir := path.Join(cwd, "data", "packages", project)
-	err = os.MkdirAll(packageDir, 0777)
+	packageDir := path.Join(getPackageDir(), project)
+	err = os.MkdirAll(packageDir, 0755)
 	if err != nil {
 		panic(err)
 	}
