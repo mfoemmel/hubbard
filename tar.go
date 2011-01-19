@@ -182,6 +182,10 @@ func mkdir(path string) os.Error {
 	return os.Mkdir(path, 0755)
 }
 
+func mkdir_p(path string) os.Error {
+	return os.MkdirAll(path, 0755)
+}
+
 func list(path string) ([]string, os.Error) {
 	dir, err := os.Open(path, os.O_RDONLY, 0)
 	if err != nil {

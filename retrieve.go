@@ -7,6 +7,8 @@ import "os"
 import "path"
 import "strings"
 
+// Retrieve downloads packages listed in the [versions] section of 'package.hub'
+// into the client's project directory.
 func cmdRetrieve() {
 	defer func() {
 		if r := recover(); r != nil {
@@ -62,7 +64,16 @@ func srvRetrieve(dst string) {
 
 func retrieve(project string, sha1 string) os.Error {
 	url := "http://localhost:4788/packages/" + project + "/" + sha1 + ".tar.gz"
+	destDir := path.Join("deps", project)
+
 	println("Retrieving package: ", url)
+	println("\tinto: ", destDir)
+
+	err := mkdir_p(destDir)
+	if err != nil {
+		return err
+	}
+
 	resp, _, err := http.Get(url)
 	if err != nil {
 		return err
@@ -76,7 +87,7 @@ func retrieve(project string, sha1 string) os.Error {
 		panic(strings.TrimSpace(string(body)))
 	}
 
-	err = unarchive(".", resp.Body)
+	err = unarchive(destDir, resp.Body)
 	if err != nil {
 		return err
 	}
