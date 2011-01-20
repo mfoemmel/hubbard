@@ -75,7 +75,7 @@ func (self *gitRepo) resolve(ref string) (sha1 string) {
 	}
 	for _, line := range tags {
 		tag := strings.TrimSpace(line)
-		sha1, ok := capture(self.dir, []string{"git", "show", "-s", "--format='%H'"})
+		sha1, ok := capture(self.dir, []string{"git", "show", "-s", "--format=%H"})
 		if !ok {
 			panic("Couldn't get SHA1 for tag: " + tag)
 		}
