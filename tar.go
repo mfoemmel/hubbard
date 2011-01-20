@@ -102,6 +102,11 @@ func copyToFile(name string, tr *tar.Reader, mode uint32) os.Error {
 }
 
 func copyToArchive(basedir string, path string, archive *tar.Writer) os.Error {
+	// Set up directories to exclude from archives.
+	sourceCodeDirs := []string{".hg", ".git", ".svn", ".bzr"}
+	depsDir := "deps"
+	excludes := append(sourceCodeDirs, depsDir)
+
 	if !fileExists(basedir + path) {
 		return os.NewError("file not found")
 	}
@@ -125,9 +130,16 @@ func copyToArchive(basedir string, path string, archive *tar.Writer) os.Error {
 			panic(err)
 		}
 		for _, child := range children {
-			if child == ".hg" || child == ".git" || child == ".svn" {
+			// Don't archive excluded items.
+			if contains(excludes, child) {
 				continue
 			}
+			// Exclude source code directories.
+			/*
+				if child == ".hg" || child == ".git" || child == ".svn" || child == ".bzr" {
+					continue
+				}
+			*/
 			copyToArchive(basedir, path+"/"+child, archive)
 		}
 	} else {
@@ -212,4 +224,14 @@ func openReader(path string) (io.ReadCloser, os.Error) {
 
 func openWriter(path string) (io.WriteCloser, os.Error) {
 	return os.Open(path, os.O_CREAT|os.O_WRONLY, 0666)
+}
+
+// Does slice s contain item?
+func contains(s []string, item string) bool {
+	for _, x := range s {
+		if x == item {
+			return true
+		}
+	}
+	return false
 }
