@@ -1,5 +1,5 @@
 [versions]
-go/master=2bad2dbe72a94061996a2ea7519751adc98050d9
+go/release=81c91e7dcb3389a9de40fdfd9e903feed85342b1
 
 [build]
 command=./build.sh
