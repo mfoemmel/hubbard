@@ -1,7 +1,11 @@
 <html>
 <body>
-{.repeated section @}
-<a href="{name}">{name}</a><br/>
-{.end}
+  <h3>Projects:</h3>
+  <ul>
+    {.repeated section @}
+    <li><a href="{name}">{name}</a></li>
+    {.end}
+  </ul>
+  <a href="new-project">new project</a>
 </body>
 </html>

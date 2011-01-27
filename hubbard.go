@@ -44,24 +44,40 @@ func getWorkDir() string {
 	return path.Join(getDataDir(), "working")
 }
 
-// HttpHandler
-func projectList(w http.ResponseWriter, req *http.Request) {
-/*
-	out := newHtmlWriter(w)
-	for _, project := range projects {
-		out.raw("<a href=\"" + project + "\">")
-		out.text(project)
-		out.raw("</a>")
-		out.raw("<br/>")
-	}
-*/
-	t, err := template.ParseFile(path.Join(getHtmlDir(), "projects.html"), nil)
-	if err != nil {
-		panic(err)
-	}
-	err = t.Execute(readProjects(), w)
+func runTemplate(name string, data interface{}, w http.ResponseWriter) {
+	fmap := template.FormatterMap{"":template.HTMLFormatter}
+	t, err := template.ParseFile(path.Join(getHtmlDir(), name + ".html"), fmap)
 	if err != nil {
 		log.Println(err)
+		return
+	}
+	err = t.Execute(data, w)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+}
+
+// HttpHandler
+func projectList(w http.ResponseWriter, req *http.Request) {
+	runTemplate("projects", readProjects(), w)
+}
+
+func newProjectHandler(w http.ResponseWriter, req *http.Request) {
+	if req.Method == "POST" {
+		req.ParseForm()
+		name := getParameter(req, "project-name")
+		repo := getParameter(req, "project-repo")
+		println(name, repo)
+		msg := http.URLEscape("not implemented")
+		http.Redirect(w, req, "/new-project?err=" + msg, http.StatusSeeOther)
+	} else {
+		req.ParseForm()
+		var err string
+		if len(req.Form["err"]) > 0 {
+			err = req.Form["err"][0]
+		}
+		runTemplate("new-project", err, w)
 	}
 }
 
@@ -185,6 +201,7 @@ func Run() {
 	}
 
 	http.HandleFunc("/", projectHandler)
+	http.HandleFunc("/new-project", newProjectHandler)
 	http.HandleFunc("/resolve", resolveHandler)
 	http.Handle("/packages/", http.FileServer(getPackageDir(), "/packages/"))
 	http.Handle("/logs/", http.FileServer(getLogDir(), "/logs/"))
