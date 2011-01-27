@@ -1,11 +1,13 @@
 package hubbard
 
-import "http"
-import "log"
-import "strings"
-import "os"
-import "path"
-
+import (
+	"http"
+	"log"
+	"strings"
+	"os"
+	"path"
+	"template"
+)
 
 func getDataDir() string {
 	cwd, err := os.Getwd()
@@ -18,6 +20,16 @@ func getDataDir() string {
 
 func getLogDir() string {
 	return path.Join(getDataDir(), "build", "logs")
+}
+
+func getHtmlDir() string {
+	dir, _ := path.Split(os.Args[0])
+	return path.Clean(path.Join(dir, "www", "html"))
+}
+
+func getCssDir() string {
+	dir, _ := path.Split(os.Args[0])
+	return path.Clean(path.Join(dir, "www", "css"))
 }
 
 func getPackageDir() string {
@@ -34,20 +46,22 @@ func getWorkDir() string {
 
 // HttpHandler
 func projectList(w http.ResponseWriter, req *http.Request) {
-	fd, err := os.Open(getReposDir(), os.O_RDONLY, 0)
-	if err != nil {
-		panic(err)
-	}
-	projects, err := fd.Readdirnames(-1)
-	if err != nil {
-		panic(err)
-	}
+/*
 	out := newHtmlWriter(w)
 	for _, project := range projects {
 		out.raw("<a href=\"" + project + "\">")
 		out.text(project)
 		out.raw("</a>")
 		out.raw("<br/>")
+	}
+*/
+	t, err := template.ParseFile(path.Join(getHtmlDir(), "projects.html"), nil)
+	if err != nil {
+		panic(err)
+	}
+	err = t.Execute(readProjects(), w)
+	if err != nil {
+		log.Println(err)
 	}
 }
 
@@ -174,6 +188,8 @@ func Run() {
 	http.HandleFunc("/resolve", resolveHandler)
 	http.Handle("/packages/", http.FileServer(getPackageDir(), "/packages/"))
 	http.Handle("/logs/", http.FileServer(getLogDir(), "/logs/"))
+	http.Handle("/css/", http.FileServer(getCssDir(), "/css/"))
+	println(getCssDir())
 	log.Println("Listening on port 4788")
 	err := http.ListenAndServe(":4788", nil)
 	if err != nil {
