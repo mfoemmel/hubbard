@@ -16,6 +16,8 @@ GOFILES=\
 	retrieve.go\
     tar.go\
 
+CLEANFILES+=hub
+
 hub: hub.$(O)
 	$(LD) -L _obj -o hub hub.$(O)
 
