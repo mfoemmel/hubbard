@@ -27,5 +27,3 @@ func findRepo(dir string) repo {
 
 	panic("unknown repository type for directory: " + dir)
 }
-
-

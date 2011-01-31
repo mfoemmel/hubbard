@@ -45,8 +45,8 @@ func getWorkDir() string {
 }
 
 func runTemplate(name string, data interface{}, w http.ResponseWriter) {
-	fmap := template.FormatterMap{"":template.HTMLFormatter}
-	t, err := template.ParseFile(path.Join(getHtmlDir(), name + ".html"), fmap)
+	fmap := template.FormatterMap{"": template.HTMLFormatter}
+	t, err := template.ParseFile(path.Join(getHtmlDir(), name+".html"), fmap)
 	if err != nil {
 		log.Println(err)
 		return
@@ -70,7 +70,7 @@ func newProjectHandler(w http.ResponseWriter, req *http.Request) {
 		repo := getParameter(req, "project-repo")
 		println(name, repo)
 		msg := http.URLEscape("not implemented")
-		http.Redirect(w, req, "/new-project?err=" + msg, http.StatusSeeOther)
+		http.Redirect(w, req, "/new-project?err="+msg, http.StatusSeeOther)
 	} else {
 		req.ParseForm()
 		var err string
@@ -82,7 +82,7 @@ func newProjectHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func projectSummary(w http.ResponseWriter, req *http.Request, projectName string) {
-	project := &project{projectName}
+	project := newProject(projectName)
 	repo := findRepo(path.Join("data", "repos", projectName))
 	out := newHtmlWriter(w)
 	out.table()

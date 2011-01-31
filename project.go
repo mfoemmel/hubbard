@@ -6,7 +6,11 @@ import (
 )
 
 type project struct {
-	name string
+	Name string
+}
+
+func newProject(name string) *project {
+	return &project{name}
 }
 
 func readProjects() []*project {
@@ -20,12 +24,11 @@ func readProjects() []*project {
 	}
 	projects := make([]*project, len(names))
 	for i, name := range names {
-		projects[i] = &project{name}
+		projects[i] = newProject(name)
 	}
 	return projects
 }
 
 func (self *project) getLogFile(sha1 string) string {
-	return path.Join("data", "build", self.name, sha1+".log")
+	return path.Join("data", "build", self.Name, sha1+".log")
 }
-
