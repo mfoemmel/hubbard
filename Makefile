@@ -3,6 +3,7 @@ include $(GOROOT)/src/Make.inc
 TARG=hubbard
 GOFILES=\
 	build.go\
+	environment.go\
 	exec.go\
 	git.go\
 	hg.go\
@@ -14,7 +15,7 @@ GOFILES=\
 	repo.go\
 	resolve.go\
 	retrieve.go\
-    tar.go\
+	tar.go\
 
 CLEANFILES+=hub
 
