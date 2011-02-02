@@ -59,9 +59,10 @@ func TestPrependEnvironmentVariable(t *testing.T) {
 	// testFoo is the expanded value of env var path.FOO
 	testFoo := path.Join(testCwd, "bar")
 
-	populatedEnv := Environment{"FOO": "/path/to/a/dir"}
+	populatedEnv := Environment{"FOO": "/path/to/a/dir", "SPAM": "-bacon"}
 
 	expectedFoo := fmt.Sprintf("%s:%s", testFoo, populatedEnv["FOO"])
+	expectedSpam := "eggs -bacon"
 
 	testFile := "./package.hub.test"
 	testEnv := parseEnvironment(testFile, populatedEnv)
@@ -71,5 +72,8 @@ func TestPrependEnvironmentVariable(t *testing.T) {
 	}
 	if testEnv["FOO"] != expectedFoo {
 		t.Errorf("Failed to compute path for path.FOO!\n\tExpected: %s, got %v", expectedFoo, testEnv["FOO"])
+	}
+	if testEnv["SPAM"] != expectedSpam {
+		t.Errorf("Failed to compute path for var.SPAM!\n\tExpected: %s, got %v", expectedSpam, testEnv["SPAM"])
 	}
 }

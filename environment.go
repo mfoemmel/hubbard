@@ -73,6 +73,9 @@ func parseEnvironment(hubFile string, env Environment) (hubEnv Environment) {
 				baseDir := getBaseDir(hubFile)
 				if baseDir == "." || baseDir == "./" {
 					baseDir, err = os.Getwd()
+					if err != nil {
+						panic(err)
+					}
 				}
 				// pathExpr is a path expression of VARIABLE=path/to/foo
 				pathExpr := strings.Split(line, "path.", 2)[1]
@@ -80,6 +83,7 @@ func parseEnvironment(hubFile string, env Environment) (hubEnv Environment) {
 				envVar, envPath := components[0], components[1]
 				envPath = path.Join(baseDir, envPath)
 				if hubEnv.exists(envVar) {
+					// prepend the new value
 					hubEnv[envVar] = fmt.Sprintf("%s:%s", envPath, hubEnv[envVar])
 				} else {
 					hubEnv[envVar] = envPath
@@ -89,7 +93,12 @@ func parseEnvironment(hubFile string, env Environment) (hubEnv Environment) {
 				varExpr := strings.Split(line, "var.", 2)[1]
 				components := strings.Split(varExpr, "=", 2)
 				envVar, envVal := components[0], components[1]
-				hubEnv[envVar] = envVal
+				if hubEnv.exists(envVar) {
+					// prepend the new value
+					hubEnv[envVar] = fmt.Sprintf("%s %s", envVal, hubEnv[envVar])
+				} else {
+					hubEnv[envVar] = envVal
+				}
 			}
 		}
 	}
