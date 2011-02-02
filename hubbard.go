@@ -44,6 +44,19 @@ func getWorkDir() string {
 	return path.Join(getDataDir(), "working")
 }
 
+func getDepsDir() string {
+	cwd, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	depsDir := path.Join(cwd, "deps")
+	return depsDir
+}
+
+func getDepsDirFor(project string) string {
+	return path.Join(getDepsDir(), project)
+}
+
 func runTemplate(name string, data interface{}, w http.ResponseWriter) {
 	fmap := template.FormatterMap{"": template.HTMLFormatter}
 	t, err := template.ParseFile(path.Join(getHtmlDir(), name+".html"), fmap)

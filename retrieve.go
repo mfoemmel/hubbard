@@ -67,7 +67,7 @@ func srvRetrieve(dst string) {
 
 func retrieve(project string, sha1 string) os.Error {
 	url := "http://localhost:4788/packages/" + project + "/" + sha1 + ".tar.gz"
-	destDir := path.Join("deps", project)
+	destDir := getDepsDirFor(project)
 
 	println("Retrieving package: ", url)
 	println("\tinto: ", destDir)
