@@ -17,6 +17,7 @@ GOFILES=\
 	retrieve.go\
 	run.go\
 	tar.go\
+	version.go\
 
 CLEANFILES+=hub
 

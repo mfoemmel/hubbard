@@ -31,8 +31,11 @@ func cmdRun() {
 // Find project dependencies listed in the [versions] section of 'package.hub'.
 // Returns a list containing paths to package.hub files for each project dependency.
 func getProjectDeps(hubFile string) []string {
-	// TODO: Update parseVersions to return a container with multiple items.
-	project, _ := parseVersions(hubFile)
-	projectHubFile := path.Join(getDepsDirFor(project), "package.hub")
-	return []string{projectHubFile}
+	projectHubFiles := []string(nil)
+	versions := parseVersions(hubFile)
+	for _, version := range versions {
+		projectHubFile := path.Join(getDepsDirFor(version.project), "package.hub")
+		projectHubFiles = append(projectHubFiles, projectHubFile)
+	}
+	return projectHubFiles
 }

@@ -1,4 +1,7 @@
 # This file is used by the unit tests.
+[versions]
+project1/1.0=abc123
+project2/1.0=abc123
 
 [environment]
 path.FOO=bar
