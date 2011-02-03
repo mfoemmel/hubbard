@@ -134,12 +134,6 @@ func copyToArchive(basedir string, path string, archive *tar.Writer) os.Error {
 			if contains(excludes, child) {
 				continue
 			}
-			// Exclude source code directories.
-			/*
-				if child == ".hg" || child == ".git" || child == ".svn" || child == ".bzr" {
-					continue
-				}
-			*/
 			copyToArchive(basedir, path+"/"+child, archive)
 		}
 	} else {
