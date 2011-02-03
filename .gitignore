@@ -1,5 +1,14 @@
+# Project specific
 data/
 deps/
-_obj
-*.6
 hub
+
+# Go compiler output
+_go*
+_obj
+_test*
+*.6
+*.out
+
+# Emacs
+\#*
