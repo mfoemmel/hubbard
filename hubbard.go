@@ -209,6 +209,8 @@ func Run() {
 			cmdResolve()
 		case "retrieve":
 			cmdRetrieve()
+		case "run":
+			cmdRun()
 		}
 		os.Exit(0)
 	}

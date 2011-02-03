@@ -15,6 +15,7 @@ GOFILES=\
 	repo.go\
 	resolve.go\
 	retrieve.go\
+	run.go\
 	tar.go\
 
 CLEANFILES+=hub
