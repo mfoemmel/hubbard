@@ -183,9 +183,7 @@ func projectHandler(w http.ResponseWriter, req *http.Request) {
 		builder <- buildCmd{}
 		c := make(chan []byte, 100)
 		builder <- viewCmd{c}
-		for line := range c {
-			os.Stdout.Write(line)
-		}
+		http.Redirect(w, req, "/"+projectName, http.StatusSeeOther)
 		return
 	}
 
