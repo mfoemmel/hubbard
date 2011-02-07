@@ -63,7 +63,7 @@ func (self *hgRepo) readFile(sha1 string, filename string) (string, bool) {
 }
 
 func (self *hgRepo) update(sha1 string) {
-	run(os.Stdout, nil, self.dir, []string{findExe("hg"), "update", "-C", sha1})
+	run(os.Stdout, nil, self.dir, []string{findExe("hg"), "update", "--clean", sha1})
 }
 
 func (self *hgRepo) resolve(ref string) (sha1 string) {
